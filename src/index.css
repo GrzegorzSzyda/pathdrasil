@@ -1,40 +1,40 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&display=swap');
 @import 'tailwindcss';
 
 @theme {
-    --color-ink-950: #07111f;
-    --color-ink-900: #0d1b2d;
-    --color-ink-800: #172842;
-    --color-sand-100: #f5f1e8;
-    --color-sand-200: #e7dfcf;
-    --color-aqua-300: #93e6d7;
-    --color-aqua-400: #52d3bc;
-    --color-aqua-500: #1ca892;
-    --color-coral-300: #ffb19a;
-    --color-coral-400: #ff8f70;
+    --color-primary: #4f6f1e;
+    --color-primary-hover: #6e8f2a;
+    --color-primary-dark: #3b5416;
+    --color-secondary: #6b3e0b;
+    --color-secondary-hover: #8a5418;
+    --color-secondary-dark: #4a2b07;
+    --color-success: #5faf3a;
+    --color-warning: #d4a017;
+    --color-error: #c0392b;
+    --color-background: #f6f7f2;
+    --color-surface: #ffffff;
+    --color-surface-alt: #edefe6;
+    --color-text-primary: #1f2933;
+    --color-text-secondary: #4b5563;
+    --color-text-muted: #9ca3af;
     --font-sans:
-        'Space Grotesk', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+        ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
         sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
 }
 
 @layer base {
     html {
-        overflow-y: scroll;
-        background-color: #07111f;
+        background-color: var(--color-background);
     }
 
     :root {
         @apply font-sans text-[18px] leading-[1.6] antialiased;
-        color: var(--color-sand-100);
-        background:
-            radial-gradient(circle at top left, rgba(255, 177, 154, 0.2), transparent 34%),
-            radial-gradient(circle at 82% 18%, rgba(82, 211, 188, 0.22), transparent 26%),
-            linear-gradient(160deg, #07111f 0%, #0d1b2d 52%, #172842 100%);
+        color: var(--color-text-primary);
+        background: var(--color-background);
     }
 
     body {
         @apply m-0 min-h-screen;
-        background-attachment: fixed;
+        background: var(--color-background);
     }
 
     * {
@@ -44,13 +44,5 @@
     a {
         color: inherit;
         text-decoration: none;
-    }
-}
-
-@layer utilities {
-    .stack-chip {
-        border: 1px solid rgba(245, 241, 232, 0.08);
-        background: rgba(255, 255, 255, 0.05);
-        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
     }
 }

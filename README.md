@@ -20,9 +20,11 @@ bun install
 bun dev
 ```
 
+`bun dev` uruchamia aplikację na losowym wolnym porcie.
+
 ## Skrypty
 
-- `bun dev` - lokalny serwer Bun z HMR
+- `bun dev` - lokalny serwer Bun z HMR na losowym wolnym porcie
 - `bun run build` - build produkcyjny
 - `bun run lint` - lint przez Oxlint
 - `bun run format` - sprawdzenie formatowania
