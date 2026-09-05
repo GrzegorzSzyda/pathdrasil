@@ -1,4 +1,4 @@
-# AI Dev Workflow — ustalenia projektowe
+# Pathdrasil — ustalenia projektowe
 
 Ten dokument jest głównym zapisem decyzji dotyczących planowanej aplikacji. Diagram w `index.html` pokazuje skrócony przebieg procesu, natomiast szczegóły i granice odpowiedzialności są opisane tutaj.
 
