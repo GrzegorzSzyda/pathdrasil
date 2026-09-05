@@ -33,6 +33,7 @@ Docelowa hierarchia:
 - Wszystkie widoki i akcje muszą być wygodnie obsługiwane klawiaturą.
 - Najczęstsze operacje powinny mieć skróty, przewidywalne przechodzenie fokusu i dostęp z command palette.
 - `D` otwiera dashboard, `W` workflow, `A` przenosi fokus do akcji zaznaczonego taska, a `?` pokazuje kontekstowe podpowiedzi skrótów przy przyciskach.
+- Przy otwartym tasku `Ctrl + ←/→` przechodzi do poprzedniego lub następnego taska, a `F` otwiera pełny widok.
 - Szybkie akcje rozwijają się wewnątrz zaznaczonej karty. Ich skróty pochodzą od angielskich nazw czynności, np. `S` — start, `R` — refine lub review, `P` — plan.
 - Na pełnym widoku taska cyfry wybierają zakładki, a strzałki góra/dół przewijają główną treść bez przenoszenia fokusu do bocznych paneli.
 - Nazwy widoków powinny jasno opisywać ich zawartość. Unikamy ogólnych nazw w rodzaju „Centrum...”.
