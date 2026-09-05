@@ -38,11 +38,11 @@
     .board-shell { position:relative; min-height:0; overflow-x:auto; overflow-y:hidden; }
     .board { display:flex; width:100%; min-width:1080px; height:100%; isolation:isolate; }
     .column { --accent:var(--focus); position:relative; z-index:1; display:flex; flex:1 1 20%; min-width:180px; flex-direction:column; background:#171c24; outline:none; transition:flex-basis 320ms cubic-bezier(.2,.8,.2,1),min-width 320ms cubic-bezier(.2,.8,.2,1),opacity 220ms ease,filter 220ms ease,box-shadow 250ms ease; }
-    .board.has-focus .column:not(.is-focused) { flex-basis:12%; opacity:.48; filter:saturate(.45); }
+    .board.has-focus .column:not(.is-focused) { min-width:240px; flex-basis:17%; opacity:.48; filter:saturate(.45); }
     .column.is-focused { z-index:3; min-width:460px; flex-basis:40%; background:#181e27; box-shadow:-18px 0 38px #0d1117c2,18px 0 38px #0d1117c2; }
     .column.is-focused.is-task-open { min-width:720px; flex-basis:58%; }
     .board.has-focus .column.is-task-open ~ .column,
-    .board.has-focus .column:has(~ .column.is-task-open) { flex-basis:8.4%; }
+    .board.has-focus .column:has(~ .column.is-task-open) { flex-basis:14%; }
     .column-header { position:relative; display:flex; height:56px; flex:0 0 56px; align-items:center; padding:12px 20px; overflow:hidden; cursor:pointer; }
     .column-title-row { display:flex; align-items:center; gap:10px; }
     .column h2 { display:flex; align-items:center; gap:9px; margin:0; overflow:hidden; font-size:clamp(14px,1.25vw,18px); line-height:1.05; letter-spacing:-.035em; text-overflow:ellipsis; white-space:nowrap; }
