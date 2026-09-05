@@ -164,11 +164,26 @@
     .attention-item > span:last-child { color:#788598; font:600 9px/1 "IBM Plex Mono",ui-monospace,monospace; }
     .day-summary { color:#94a1b1; font-size:12px; line-height:1.75; }
     .day-summary strong { color:#d0d8e2; }
+    .completed-panel { margin-top:14px; }
+    .completed-heading { display:flex; align-items:center; justify-content:space-between; gap:20px; margin-bottom:18px; }
+    .completed-heading h2 { margin:0; }
+    .completed-heading > span { color:#687589; font-size:10px; }
+    .completed-days { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+    .completed-day { padding:16px; border-radius:9px; background:#151c25; }
+    .completed-day-head { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px; }
+    .completed-day-head strong { color:#c8d1dc; font-size:11px; }
+    .completed-count { padding:4px 7px; border-radius:999px; background:#26342f; color:#98c379; font:600 9px/1 "IBM Plex Mono",ui-monospace,monospace; }
+    .completed-list { display:grid; gap:7px; margin:0; padding:0; list-style:none; }
+    .completed-task { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:10px; min-height:46px; padding:9px 10px; border:1px solid #232d39; border-radius:7px; background:#19212b; }
+    .completed-task > i { color:#98c379; font-size:15px; }
+    .completed-task strong { display:block; overflow:hidden; color:#b8c3d0; font-size:10px; font-weight:600; text-overflow:ellipsis; white-space:nowrap; }
+    .completed-task small { display:block; margin-top:3px; color:#637084; font-size:9px; }
+    .completed-task > span:last-child { color:#667387; font:600 9px/1 "IBM Plex Mono",ui-monospace,monospace; white-space:nowrap; }
     @keyframes detail-in { from { opacity:0; transform:translateX(24px); } to { opacity:1; transform:translateX(0); } }
     @keyframes workspace-in { from { opacity:0; transform:scale(.992); } to { opacity:1; transform:scale(1); } }
     .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
     @media (max-width:980px) { .workspace-layout{grid-template-columns:180px minmax(0,1fr)} .workspace-context{display:none} .metric-grid{grid-template-columns:repeat(2,1fr)} }
-    @media (max-width:760px) { .app{grid-template-rows:60px minmax(0,1fr)} .topbar{padding:0 14px} .board{min-width:960px} .column-header{height:52px;flex-basis:52px;padding:10px 14px} .task-detail{top:52px} .workspace-header{padding:0 14px}.workspace-layout{grid-template-columns:1fr}.workspace-nav{display:flex;padding:10px;overflow-x:auto;border-right:0;border-bottom:1px solid #252e3a}.workspace-nav-label{display:none}.workspace-tab{width:auto;flex:0 0 auto;margin:0 4px 0 0}.workspace-main{padding:28px 20px}.workspace-status{display:none} }
+    @media (max-width:760px) { .app{grid-template-rows:60px minmax(0,1fr)} .topbar{padding:0 14px} .board{min-width:960px} .column-header{height:52px;flex-basis:52px;padding:10px 14px} .task-detail{top:52px} .workspace-header{padding:0 14px}.workspace-layout{grid-template-columns:1fr}.workspace-nav{display:flex;padding:10px;overflow-x:auto;border-right:0;border-bottom:1px solid #252e3a}.workspace-nav-label{display:none}.workspace-tab{width:auto;flex:0 0 auto;margin:0 4px 0 0}.workspace-main{padding:28px 20px}.workspace-status{display:none}.completed-days{grid-template-columns:1fr} }
     @media (prefers-reduced-motion:reduce) { .column,.card{transition:none} }
   </style>
 </head>
@@ -253,6 +268,13 @@
         <section class="dashboard-grid">
           <article class="dashboard-panel"><h2>Wymaga uwagi</h2><div class="attention-list"><div class="attention-item"><span class="attention-icon"><i class="ph ph-x-circle" aria-hidden="true"></i></span><span><strong>Pipeline PR #51 nie przeszedł</strong><small>Draft wiadomości do zespołu</small></span><span>3 min</span></div><div class="attention-item"><span class="attention-icon"><i class="ph ph-chat-circle" aria-hidden="true"></i></span><span><strong>Nowy komentarz w review</strong><small>Dwa pytania o obsługę błędów</small></span><span>12 min</span></div><div class="attention-item"><span class="attention-icon"><i class="ph ph-tree-structure" aria-hidden="true"></i></span><span><strong>Brak dostępnego worktree</strong><small>Nieudany nocny start agenta</small></span><span>08:42</span></div></div></article>
           <article class="dashboard-panel"><h2>Podsumowanie dnia</h2><p class="day-summary"><strong>Trzy zadania zakończone</strong>, dwa merge requesty gotowe do przeglądu. Agenci wykonali łącznie 24 testy i przygotowali aktualizację dokumentacji API.</p><p class="day-summary">Na wieczór pozostał <strong>jeden bloker techniczny</strong> i decyzja dotycząca mapowania statusów z Linear.</p></article>
+        </section>
+        <section class="dashboard-panel completed-panel" aria-labelledby="completed-title">
+          <header class="completed-heading"><h2 id="completed-title">Zrealizowane taski</h2><span>5 tasków · 4 merge requesty</span></header>
+          <div class="completed-days">
+            <article class="completed-day"><header class="completed-day-head"><strong>Dzisiaj</strong><span class="completed-count">3 zakończone</span></header><ul class="completed-list"><li class="completed-task"><i class="ph ph-check-circle" aria-hidden="true"></i><span><strong>Konfiguracja projektu</strong><small>Scalone do main, środowisko gotowe</small></span><span>AT-084</span></li><li class="completed-task"><i class="ph ph-check-circle" aria-hidden="true"></i><span><strong>Sprawdzanie dostępności agentów</strong><small>Codex i Claude wykrywane automatycznie</small></span><span>AT-094</span></li><li class="completed-task"><i class="ph ph-check-circle" aria-hidden="true"></i><span><strong>Stan przeczytania aktywności</strong><small>24 testy przeszły bez błędów</small></span><span>AT-098</span></li></ul></article>
+            <article class="completed-day"><header class="completed-day-head"><strong>Wczoraj</strong><span class="completed-count">2 zakończone</span></header><ul class="completed-list"><li class="completed-task"><i class="ph ph-check-circle" aria-hidden="true"></i><span><strong>Synchronizacja listy tasków</strong><small>Automatycznie rozwiązano konflikt</small></span><span>AT-089</span></li><li class="completed-task"><i class="ph ph-check-circle" aria-hidden="true"></i><span><strong>Autoryzacja integracji GitHub</strong><small>Token przechowywany wyłącznie lokalnie</small></span><span>AT-087</span></li></ul></article>
+          </div>
         </section>
       </div>
     </main>
