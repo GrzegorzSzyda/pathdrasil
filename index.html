@@ -492,6 +492,16 @@
       announcement.textContent = `Otwarto pełny widok taska ${task.key}`;
     };
 
+    const moveOpenTask = direction => {
+      if (!openCard) return;
+      const cards = columns.flatMap(column => [...column.querySelectorAll('.card')]);
+      const currentIndex = cards.indexOf(openCard);
+      if (currentIndex === -1) return;
+      const nextCard = cards[(currentIndex + direction + cards.length) % cards.length];
+      selectCard(nextCard);
+      openTask(nextCard);
+    };
+
     const closeTask = () => {
       if (!openCard) return;
       const cardToFocus = openCard;
@@ -516,7 +526,7 @@
       card.classList.add('is-open');
       columns.forEach(item => item.classList.remove('is-task-open'));
       column.classList.add('is-task-open');
-      taskDetail.innerHTML = `<button class="detail-expand" type="button"><i class="ph ph-arrows-out" aria-hidden="true"></i>Pełny ekran</button><button class="detail-close" type="button" aria-label="Zamknij szczegóły"><i class="ph ph-x" aria-hidden="true"></i></button><p class="detail-eyebrow">${key}${status}</p><h3>${title}</h3><p class="detail-body">${description}</p><div class="task-actions" aria-label="Akcje taska">${renderActions(columnIndex)}</div><p class="action-feedback" aria-live="polite"></p><div class="detail-section"><span class="detail-label">Aktualny etap</span><span class="detail-value">${column.querySelector('h2').textContent}</span></div><div class="detail-section"><span class="detail-label">Ostatnia aktywność</span><span class="detail-value">Agent zaktualizował kontekst zadania. Pełna historia pozostaje w dzienniku pracy.</span></div>`;
+      taskDetail.innerHTML = `<button class="detail-expand" type="button" data-shortcut="F"><i class="ph ph-arrows-out" aria-hidden="true"></i>Pełny ekran</button><button class="detail-close" type="button" aria-label="Zamknij szczegóły"><i class="ph ph-x" aria-hidden="true"></i></button><p class="detail-eyebrow">${key}${status}</p><h3>${title}</h3><p class="detail-body">${description}</p><div class="task-actions" aria-label="Akcje taska">${renderActions(columnIndex)}</div><p class="action-feedback" aria-live="polite"></p><div class="detail-section"><span class="detail-label">Aktualny etap</span><span class="detail-value">${column.querySelector('h2').textContent}</span></div><div class="detail-section"><span class="detail-label">Ostatnia aktywność</span><span class="detail-value">Agent zaktualizował kontekst zadania. Pełna historia pozostaje w dzienniku pracy.</span></div>`;
       column.append(taskDetail);
       taskDetail.hidden = false;
       taskDetail.querySelector('.detail-close').addEventListener('click', closeTask);
@@ -616,6 +626,11 @@
         const actionArea = openCard ? taskDetail : document.querySelector('.card.is-selected .card-inline-actions');
         const action = actionArea?.querySelector(`[data-shortcut="${key}"]`);
         if (action) { event.preventDefault(); action.click(); return; }
+      }
+      if (openCard && taskWorkspace.hidden && event.ctrlKey && !event.metaKey && !event.altKey && (event.key === 'ArrowLeft' || event.key === 'ArrowRight')) {
+        event.preventDefault();
+        moveOpenTask(event.key === 'ArrowRight' ? 1 : -1);
+        return;
       }
       if (event.key === 'Enter' && document.activeElement.classList.contains('card')) { event.preventDefault(); openTask(document.activeElement); return; }
       const inlineActions = document.activeElement.closest?.('.card-inline-actions');
