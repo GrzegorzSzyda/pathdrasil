@@ -3,7 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Flowboard — AI Dev Workflow</title>
+  <title>Pathdrasil — AI Development Workflow</title>
+  <meta name="description" content="Pathdrasil prowadzi zadania programistyczne od pomysłu, przez pracę agentów AI, aż do merge." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -18,6 +19,7 @@
     .brand,.topbar-actions,.key-hint,.view-switch { display:flex; align-items:center; }
     .brand { gap:14px; }
     .brand-mark { display:grid; width:32px; height:32px; place-items:center; border-radius:9px; background:#222a36; color:#aab4c3; font-size:18px; }
+    .brand-name { color:#d9e0e9; font-size:14px; font-weight:700; letter-spacing:-.02em; }
     .brand-divider { width:1px; height:24px; background:#303a49; }
     .project-name { display:flex; align-items:center; gap:9px; }
     .project-name i { color:#738096; font-size:18px; }
@@ -190,7 +192,7 @@
 <body>
   <div class="app">
     <header class="topbar">
-      <div class="brand"><div class="brand-mark" aria-label="Flowboard"><i class="ph ph-kanban" aria-hidden="true"></i></div><span class="brand-divider" aria-hidden="true"></span><div class="project-name"><i class="ph ph-code" aria-hidden="true"></i><strong>Project Atlas</strong></div></div>
+      <div class="brand"><div class="brand-mark" aria-hidden="true"><i class="ph ph-kanban" aria-hidden="true"></i></div><span class="brand-name">Pathdrasil</span><span class="brand-divider" aria-hidden="true"></span><div class="project-name"><i class="ph ph-code" aria-hidden="true"></i><strong>Project Atlas</strong></div></div>
       <div class="topbar-actions"><div class="view-switch" aria-label="Widok aplikacji"><button type="button" data-view="dashboard" data-shortcut="D" aria-pressed="false"><i class="ph ph-squares-four" aria-hidden="true"></i>Dashboard <kbd>D</kbd></button><button type="button" data-view="workflow" data-shortcut="W" aria-pressed="true"><i class="ph ph-kanban" aria-hidden="true"></i>Workflow <kbd>W</kbd></button><a href="graph.html" data-shortcut="G"><i class="ph ph-share-network" aria-hidden="true"></i>Graf <kbd>G</kbd></a></div><span class="avatar" aria-label="Profil GS">GS</span></div>
     </header>
     <main class="board-shell">
