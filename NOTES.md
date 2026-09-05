@@ -267,6 +267,7 @@ Aplikacja może sprawdzać, czy wymagany sekret istnieje, ale nie powinna kopiow
 
 ## Zasady diagramu
 
+- Skrót `G` otwiera graf z dashboardu lub workflow, a `W` wraca z grafu do workflow.
 - Główny graf pokazuje tylko najważniejsze przejścia, decyzje i pętle.
 - Szczegóły widoków znajdują się w modalach.
 - Diagram jest prowadzony od góry do dołu.

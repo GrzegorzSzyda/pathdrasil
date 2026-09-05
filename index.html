@@ -24,8 +24,8 @@
     .project-name strong { font-size:13px; font-weight:600; letter-spacing:-.01em; }
     .topbar-actions { gap:16px; color:var(--muted); font-size:12px; }
     .view-switch { gap:4px; padding:4px; border-radius:9px; background:#141922; }
-    .view-switch button { display:flex; min-height:30px; align-items:center; gap:7px; padding:0 10px; border:0; border-radius:6px; background:transparent; color:#647084; font-size:10px; font-weight:600; cursor:pointer; }
-    .view-switch button:hover { color:#bac4d0; }
+    .view-switch button,.view-switch a { display:flex; min-height:30px; align-items:center; gap:7px; padding:0 10px; border:0; border-radius:6px; background:transparent; color:#647084; font-size:10px; font-weight:600; text-decoration:none; cursor:pointer; }
+    .view-switch button:hover,.view-switch a:hover { color:#bac4d0; }
     .view-switch button[aria-pressed="true"] { background:#27313e; color:#d4dbe4; }
     .view-switch kbd { min-width:18px; padding:3px 5px; border:0; background:#343e4c; box-shadow:none; font-size:9px; }
     .view-link { padding:8px 11px; border-radius:7px; background:#222a36; color:#aab4c3; text-decoration:none; }
@@ -191,7 +191,7 @@
   <div class="app">
     <header class="topbar">
       <div class="brand"><div class="brand-mark" aria-label="Flowboard"><i class="ph ph-kanban" aria-hidden="true"></i></div><span class="brand-divider" aria-hidden="true"></span><div class="project-name"><i class="ph ph-code" aria-hidden="true"></i><strong>Project Atlas</strong></div></div>
-      <div class="topbar-actions"><div class="view-switch" aria-label="Widok aplikacji"><button type="button" data-view="dashboard" data-shortcut="D" aria-pressed="false"><i class="ph ph-squares-four" aria-hidden="true"></i>Dashboard <kbd>D</kbd></button><button type="button" data-view="workflow" data-shortcut="W" aria-pressed="true"><i class="ph ph-kanban" aria-hidden="true"></i>Workflow <kbd>W</kbd></button></div><span class="avatar" aria-label="Profil GS">GS</span></div>
+      <div class="topbar-actions"><div class="view-switch" aria-label="Widok aplikacji"><button type="button" data-view="dashboard" data-shortcut="D" aria-pressed="false"><i class="ph ph-squares-four" aria-hidden="true"></i>Dashboard <kbd>D</kbd></button><button type="button" data-view="workflow" data-shortcut="W" aria-pressed="true"><i class="ph ph-kanban" aria-hidden="true"></i>Workflow <kbd>W</kbd></button><a href="graph.html" data-shortcut="G"><i class="ph ph-share-network" aria-hidden="true"></i>Graf <kbd>G</kbd></a></div><span class="avatar" aria-label="Profil GS">GS</span></div>
     </header>
     <main class="board-shell">
       <section class="board" aria-label="Tablica zadań" id="board">
@@ -584,6 +584,7 @@
       const key = event.key.toUpperCase();
       const hasModifier = event.ctrlKey || event.metaKey || event.altKey;
       if ((event.key === '?' || (event.key === '/' && event.shiftKey)) && !hasModifier) { event.preventDefault(); toggleShortcutHints(); return; }
+      if (!hasModifier && key === 'G') { event.preventDefault(); window.location.href = 'graph.html'; return; }
       if (!hasModifier && (key === 'D' || key === 'W')) { event.preventDefault(); showView(key === 'D' ? 'dashboard' : 'workflow'); return; }
       if (event.key === 'Escape' && !taskWorkspace.hidden) { event.preventDefault(); closeWorkspace(); return; }
       if (!taskWorkspace.hidden && workspaceState) {
