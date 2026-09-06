@@ -3,7 +3,11 @@ import { Button } from '../components/Button'
 import { Header } from '../components/Header'
 import { Heading } from '../components/Heading'
 
-export const WelcomePage = (): React.JSX.Element => (
+type WelcomePageProps = { onCreate: () => void }
+
+export const WelcomePage = ({
+  onCreate,
+}: WelcomePageProps): React.JSX.Element => (
   <main className="bg-welcome text-text min-h-screen px-6 py-8 text-base sm:px-10">
     <div className="flex min-h-[calc(100vh-4rem)] w-full flex-col">
       <Header />
@@ -15,7 +19,7 @@ export const WelcomePage = (): React.JSX.Element => (
           Dodaj lokalne repozytorium, aby zbudować swoją pierwszą przestrzeń
           pracy
         </p>
-        <Button type="button">
+        <Button type="button" onClick={onCreate}>
           <PlusIcon size={20} weight="bold" aria-hidden="true" />
           <span>Dodaj projekt</span>
         </Button>

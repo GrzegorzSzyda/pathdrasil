@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes } from 'react'
+import { forwardRef, type ButtonHTMLAttributes } from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '../lib/cn'
 
@@ -13,6 +13,7 @@ const buttonVariants = cva(
       appearance: {
         solid: '',
         ghost: '',
+        outline: '',
       },
       size: {
         default: 'min-h-12 px-5',
@@ -38,6 +39,12 @@ const buttonVariants = cva(
         class: 'text-muted hover:bg-surface hover:text-heading',
       },
       {
+        tone: 'brand',
+        appearance: 'outline',
+        class:
+          'border border-border bg-surface/50 text-heading hover:bg-surface',
+      },
+      {
         tone: 'danger',
         appearance: 'ghost',
         class: 'text-danger hover:bg-danger/15',
@@ -50,20 +57,19 @@ const buttonVariants = cva(
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> &
   VariantProps<typeof buttonVariants>
 
-export const Button = ({
-  tone,
-  appearance,
-  size,
-  className = '',
-  children,
-  ...props
-}: ButtonProps): React.JSX.Element => {
-  return (
-    <button
-      className={cn(buttonVariants({ tone, appearance, size }), className)}
-      {...props}
-    >
-      {children}
-    </button>
-  )
-}
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
+  function Button(
+    { tone, appearance, size, className = '', children, ...props },
+    ref,
+  ): React.JSX.Element {
+    return (
+      <button
+        ref={ref}
+        className={cn(buttonVariants({ tone, appearance, size }), className)}
+        {...props}
+      >
+        {children}
+      </button>
+    )
+  },
+)
