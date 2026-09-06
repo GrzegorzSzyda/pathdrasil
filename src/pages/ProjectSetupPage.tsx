@@ -103,7 +103,11 @@ export const ProjectSetupPage = ({
   const headingRef = useRef<HTMLHeadingElement>(null)
 
   useEffect(() => {
-    headingRef.current?.focus()
+    const firstControl = document.querySelector<HTMLElement>(
+      '#setup-content input:not([disabled]), #setup-content select:not([disabled]), #setup-content textarea:not([disabled]), #setup-content button:not([disabled])',
+    )
+    if (firstControl) firstControl.focus()
+    else headingRef.current?.focus()
   }, [activeStep])
 
   useEffect(() => {
@@ -241,7 +245,6 @@ export const ProjectSetupPage = ({
             >
               <TextInput
                 id="project-name"
-                autoFocus
                 value={projectName}
                 onChange={(event) => {
                   setProjectName(event.target.value)

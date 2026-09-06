@@ -81,6 +81,7 @@ export const SetupLayout = ({
           </p>
         </nav>
         <section
+          id="setup-content"
           className="mx-auto flex w-full max-w-2xl flex-col"
           aria-label={steps[activeStep]?.title}
         >
