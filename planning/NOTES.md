@@ -1,6 +1,6 @@
 # Pathdrasil — ustalenia projektowe
 
-Ten dokument jest głównym zapisem decyzji dotyczących planowanej aplikacji. Diagram w `index.html` pokazuje skrócony przebieg procesu, natomiast szczegóły i granice odpowiedzialności są opisane tutaj.
+Ten dokument jest głównym zapisem decyzji dotyczących planowanej aplikacji. Diagram w `prototype/graph.html` pokazuje skrócony przebieg procesu, natomiast szczegóły i granice odpowiedzialności są opisane tutaj.
 
 ## Cel aplikacji
 

@@ -1,8 +1,4 @@
-# Previous hosting artifacts
-site-stage/
-site-deploy.tar.gz
-\\
-
-# Local graph archives
-graph.zip
-graph.7z
+node_modules/
+dist/
+.vite/
+*.tsbuildinfo

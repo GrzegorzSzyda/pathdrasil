@@ -1,0 +1,43 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Nunito Sans', ui-rounded, 'Segoe UI', sans-serif;
+  --color-page: #10151d;
+  --color-page-deep: #151d28;
+  --color-page-glow: #213344;
+  --color-surface: #243646;
+  --color-border: #50677b;
+  --color-heading: #cbd5df;
+  --color-text: #cbd5df;
+  --color-muted: #8997a8;
+  --color-brand: #10b981;
+  --color-brand-hover: #34d399;
+  --color-brand-soft: #d1fae5;
+  --color-brand-ink: #022c22;
+  --color-danger: #ef4444;
+  --color-danger-hover: #f87171;
+  --color-danger-ink: #450a0a;
+  --color-focus: #b8ead5;
+  --background-image-welcome: radial-gradient(
+    circle at 50% 35%,
+    var(--color-page-glow) 0,
+    var(--color-page-deep) 34%,
+    var(--color-page) 72%
+  );
+}
+
+@layer base {
+  :root {
+    font-family: var(--font-sans);
+    font-size: 16px;
+    font-synthesis: none;
+  }
+  body {
+    min-width: 320px;
+    min-height: 100vh;
+    margin: 0;
+  }
+  button {
+    font: inherit;
+  }
+}
