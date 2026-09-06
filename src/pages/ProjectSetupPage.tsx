@@ -6,6 +6,7 @@ import {
   GithubLogoIcon,
   RobotIcon,
   SlidersHorizontalIcon,
+  WarningCircleIcon,
   WrenchIcon,
   XIcon,
 } from '@phosphor-icons/react'
@@ -44,6 +45,22 @@ const taskProviders: ProviderOption[] = [
     badge: 'Wkrótce',
     available: false,
     icon: <WrenchIcon size={24} />,
+  },
+  {
+    id: 'gitlab-issues',
+    name: 'GitLab Issues',
+    description: 'Brak autoryzowanego narzędzia GitLab CLI',
+    badge: 'Brak autoryzacji',
+    available: false,
+    icon: <CodeIcon size={24} />,
+  },
+  {
+    id: 'jira',
+    name: 'Jira',
+    description: 'Nie udało się połączyć z providerem Jira',
+    badge: 'Błąd połączenia',
+    available: false,
+    icon: <WarningCircleIcon size={24} />,
   },
 ]
 
@@ -121,6 +138,15 @@ export const ProjectSetupPage = ({
         setShortcutsVisible((visible) => !visible)
       }
       if (directoryIndex !== null) return
+      if (/^[1-6]$/.test(event.key) && !editing) {
+        const requestedStep = Number(event.key) - 1
+        if (requestedStep <= activeStep) {
+          event.preventDefault()
+          setError('')
+          setActiveStep(requestedStep)
+        }
+        return
+      }
       if (event.key === 'Enter' && target.tagName !== 'TEXTAREA') {
         event.preventDefault()
         advance()
@@ -264,10 +290,6 @@ export const ProjectSetupPage = ({
               value={taskProvider}
               onChange={setTaskProvider}
             />
-            <InlineAlert tone="info">
-              GitHub Issues zostanie zweryfikowane przez `gh` przed pierwszą
-              synchronizacją.
-            </InlineAlert>
           </div>
         )}
 
