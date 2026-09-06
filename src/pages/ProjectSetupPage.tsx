@@ -236,12 +236,7 @@ export const ProjectSetupPage = ({
 
         {activeStep === 0 && (
           <div className="grid gap-6">
-            <FormField
-              id="project-name"
-              label="Nazwa projektu"
-              hint="Np. Pathdrasil — rozwój aplikacji"
-              required
-            >
+            <FormField id="project-name" label="Nazwa projektu" required>
               <TextInput
                 id="project-name"
                 value={projectName}
@@ -253,10 +248,6 @@ export const ProjectSetupPage = ({
                 hasError={Boolean(error)}
               />
             </FormField>
-            <InlineAlert>
-              Projekt pozostaje lokalny. Integracje użyją autoryzacji narzędzi
-              dostępnych na tym komputerze.
-            </InlineAlert>
           </div>
         )}
 
