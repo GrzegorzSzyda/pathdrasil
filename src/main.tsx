@@ -6,6 +6,7 @@ import '@fontsource/nunito-sans/600.css'
 import '@fontsource/nunito-sans/700.css'
 import { CheckCircleIcon } from '@phosphor-icons/react'
 import { Button } from './components/Button'
+import { Topbar } from './components/Topbar'
 import { ProjectSetupPage } from './pages/ProjectSetupPage'
 import { WelcomePage } from './pages/WelcomePage'
 import './tailwind.css'
@@ -40,24 +41,29 @@ const App = (): React.JSX.Element => {
     )
   if (view === 'complete')
     return (
-      <main className="bg-welcome text-text grid min-h-screen place-items-center p-6">
-        <div className="grid max-w-md gap-5 text-center">
-          <CheckCircleIcon
-            className="text-brand mx-auto"
-            size={56}
-            weight="duotone"
-            aria-hidden="true"
-          />
-          <h1 className="text-heading text-4xl font-semibold">
-            Projekt utworzony
-          </h1>
-          <p className="text-muted">
-            Konfiguracja została przygotowana. Synchronizacja integracji będzie
-            kolejnym krokiem.
-          </p>
-          <Button type="button" onClick={() => setView('welcome')}>
-            Wróć do projektów
-          </Button>
+      <main className="bg-welcome text-text min-h-screen px-6 py-6 sm:px-10">
+        <div className="mx-auto flex min-h-[calc(100vh-3rem)] w-full max-w-6xl flex-col">
+          <Topbar title="Projekt utworzony" />
+          <div className="grid flex-1 place-items-center p-6">
+            <div className="grid max-w-md gap-5 text-center">
+              <CheckCircleIcon
+                className="text-brand mx-auto"
+                size={56}
+                weight="duotone"
+                aria-hidden="true"
+              />
+              <h2 className="text-heading text-4xl font-semibold">
+                Projekt utworzony
+              </h2>
+              <p className="text-muted">
+                Konfiguracja została przygotowana. Synchronizacja integracji
+                będzie kolejnym krokiem.
+              </p>
+              <Button type="button" onClick={() => setView('welcome')}>
+                Wróć do projektów
+              </Button>
+            </div>
+          </div>
         </div>
       </main>
     )

@@ -202,13 +202,13 @@ export const ProjectSetupPage = ({
         nextLabel={activeStep === steps.length - 1 ? 'Utwórz projekt' : 'Dalej'}
         onHelp={() => setHelpOpen(true)}
       >
-        <h1
+        <h2
           ref={headingRef}
           tabIndex={-1}
           className="text-heading text-4xl font-semibold tracking-tight outline-none sm:text-5xl"
         >
           {steps[activeStep].title}
-        </h1>
+        </h2>
         <p className="text-muted mt-4 mb-8 text-base leading-relaxed">
           {activeStep === 0 &&
             'Utwórz odseparowaną przestrzeń dla tasków, repozytoriów i agentów.'}

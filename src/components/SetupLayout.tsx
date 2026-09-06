@@ -1,11 +1,8 @@
 import type { ReactNode } from 'react'
-import {
-  ArrowLeftIcon,
-  ArrowRightIcon,
-  QuestionIcon,
-} from '@phosphor-icons/react'
+import { ArrowLeftIcon, ArrowRightIcon } from '@phosphor-icons/react'
 import { Button } from './Button'
 import { Kbd } from './Kbd'
+import { Topbar } from './Topbar'
 
 export type SetupStep = { title: string; description: string }
 
@@ -34,20 +31,7 @@ export const SetupLayout = ({
 }: SetupLayoutProps): React.JSX.Element => (
   <main className="bg-page text-text min-h-screen">
     <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-6 py-6 sm:px-10">
-      <header className="border-border/50 flex items-center justify-between border-b pb-5">
-        <span className="text-heading font-semibold tracking-tight">
-          Pathdrasil / Nowy projekt
-        </span>
-        <Button
-          type="button"
-          appearance="ghost"
-          size="icon"
-          aria-label="Skróty klawiaturowe"
-          onClick={onHelp}
-        >
-          <QuestionIcon aria-hidden="true" />
-        </Button>
-      </header>
+      <Topbar title="Nowy projekt" onHelp={onHelp} />
       <div className="grid flex-1 gap-10 py-10 lg:grid-cols-[220px_1fr]">
         <nav aria-label="Etapy tworzenia projektu">
           <ol className="grid gap-2">
