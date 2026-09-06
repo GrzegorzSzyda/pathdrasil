@@ -7,7 +7,7 @@ Użytkownik może rozpocząć tworzenie projektu z pustego widoku głównego bez
 ## Przepływ MVP
 
 1. **Projekt** — nazwa i podstawowe ustawienia wewnętrzne Pathdrasil.
-2. **Task manager** — GitHub Issues albo nieaktywny Linear.
+2. **Task manager** — wybór providera oraz konkretnego wykrytego konta CLI; GitHub Issues jest dostępny, pozostałe warianty pokazują stan niedostępności.
 3. **Repozytoria** — GitHub i co najmniej jedno lokalne repozytorium; akcja „Dodaj kolejne repozytorium” pozostaje na tej samej stronie domeny.
 4. **Agent** — wykrycie i wybór Codex CLI; pozostali providerzy mogą być pokazani jako „Wkrótce”.
 5. **Reguły projektu** — języki i początkowa polityka autonomii Pathdrasil.

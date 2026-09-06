@@ -16,6 +16,8 @@
 - Preferujemy istniejącą lokalną autoryzację oficjalnego CLI, jeżeli pozwala wykonać cały wymagany zakres operacji.
 - Pathdrasil nie kopiuje tokenów z konfiguracji CLI i nie przekazuje ich do frontendu.
 - Backend sprawdza osobno: obecność programu, autoryzację i wymagane uprawnienia.
+- Jedno narzędzie może udostępniać wiele kont; konto jest wybierane jawnie w obrębie projektu i zapisywane jako część konfiguracji połączenia.
+- Lista kont pochodzi z backendu (np. profile `gh`/`glab`), a nie z ręcznie wklejanych tokenów.
 - Niedostępny provider pozostaje nieaktywny. Etykieta albo opis przy kontrolce wyjaśnia, czy powodem jest brak implementacji, programu, autoryzacji lub uprawnień.
 - Komunikat o niedostępności należy do wspólnego komponentu wyboru providera, a nie do logiki konkretnej strony.
 
