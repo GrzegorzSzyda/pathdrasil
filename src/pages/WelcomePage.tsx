@@ -29,11 +29,17 @@ export const WelcomePage = ({
           Dodaj lokalne repozytorium, aby zbudować swoją pierwszą przestrzeń
           pracy
         </p>
-        <Button type="button" onClick={onCreate}>
-          <PlusIcon size={20} weight="bold" aria-hidden="true" />
-          <span>Dodaj projekt</span>
-          {shortcutsVisible && <Kbd>N / Enter</Kbd>}
-        </Button>
+        <span className="relative">
+          <Button type="button" onClick={onCreate}>
+            <PlusIcon size={20} weight="bold" aria-hidden="true" />
+            <span>Dodaj projekt</span>
+          </Button>
+          {shortcutsVisible && (
+            <Kbd className="absolute top-1/2 left-full ml-2 -translate-y-1/2">
+              N / Enter
+            </Kbd>
+          )}
+        </span>
       </div>
     </div>
   </main>

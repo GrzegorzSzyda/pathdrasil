@@ -1,7 +1,6 @@
 import { QuestionIcon, TreeStructureIcon } from '@phosphor-icons/react'
 import { Button } from './Button'
 import { Heading } from './Heading'
-import { Kbd } from './Kbd'
 
 type TopbarProps = {
   title?: string
@@ -40,7 +39,6 @@ export const Topbar = ({
       >
         <QuestionIcon aria-hidden="true" />
         <span className="hidden sm:inline">Skróty</span>
-        <Kbd>?</Kbd>
       </Button>
     )}
   </header>

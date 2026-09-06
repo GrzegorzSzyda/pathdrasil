@@ -86,24 +86,34 @@ export const SetupLayout = ({
         >
           <div className="flex-1">{children}</div>
           <footer className="border-border mt-10 flex items-center justify-between gap-4 border-t pt-5">
-            <Button
-              type="button"
-              appearance="ghost"
-              onClick={onBack}
-              disabled={activeStep === 0}
-            >
-              <ArrowLeftIcon aria-hidden="true" /> Wstecz
-              {shortcutsVisible && <Kbd>Esc / ⌫</Kbd>}
-            </Button>
-            <Button type="button" onClick={onNext} disabled={!canNext}>
-              <span>{nextLabel}</span>
-              {activeStep < steps.length - 1 && (
-                <>
-                  {shortcutsVisible && <Kbd>Alt →</Kbd>}
-                  <ArrowRightIcon aria-hidden="true" />
-                </>
+            <span className="relative">
+              <Button
+                type="button"
+                appearance="ghost"
+                onClick={onBack}
+                disabled={activeStep === 0}
+              >
+                <ArrowLeftIcon aria-hidden="true" /> Wstecz
+              </Button>
+              {shortcutsVisible && (
+                <Kbd className="absolute top-1/2 left-full ml-2 -translate-y-1/2">
+                  Esc / ⌫
+                </Kbd>
               )}
-            </Button>
+            </span>
+            <span className="relative">
+              <Button type="button" onClick={onNext} disabled={!canNext}>
+                <span>{nextLabel}</span>
+                {activeStep < steps.length - 1 && (
+                  <ArrowRightIcon aria-hidden="true" />
+                )}
+              </Button>
+              {shortcutsVisible && activeStep < steps.length - 1 && (
+                <Kbd className="absolute top-1/2 right-full mr-2 -translate-y-1/2">
+                  Alt →
+                </Kbd>
+              )}
+            </span>
           </footer>
         </section>
       </div>
