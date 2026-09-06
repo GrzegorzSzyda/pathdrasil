@@ -3,7 +3,9 @@ import {
   GithubLogoIcon,
   WarningCircleIcon,
   WrenchIcon,
+  ArrowSquareOutIcon,
 } from '@phosphor-icons/react'
+import { Button } from '../../components/Button'
 import { FormField, fieldClassName } from '../../components/FormField'
 import {
   ProviderPicker,
@@ -49,6 +51,7 @@ type Props = StepCommonProps & {
   onChange: (value: string) => void
   account: string
   onAccountChange: (value: string) => void
+  onOpenStates: () => void
 }
 
 export const TaskManagerStep = ({
@@ -56,6 +59,7 @@ export const TaskManagerStep = ({
   onChange,
   account,
   onAccountChange,
+  onOpenStates,
 }: Props): React.JSX.Element => (
   <div className="grid gap-8">
     <ProviderPicker
@@ -80,25 +84,8 @@ export const TaskManagerStep = ({
         <option value="gl-personal">GitLab · konto prywatne (glab)</option>
       </select>
     </FormField>
-    <section aria-labelledby="provider-states-title">
-      <h3
-        className="text-heading text-sm font-semibold"
-        id="provider-states-title"
-      >
-        Podgląd stanów
-      </h3>
-      <p className="text-muted mt-1 mb-4 text-sm">
-        Przykładowe stany boksów do testów interfejsu.
-      </p>
-      <ProviderPicker
-        label="Przykładowe stany providerów"
-        options={providers.map((provider) => ({
-          ...provider,
-          id: `demo-${provider.id}`,
-        }))}
-        value="demo-github-issues"
-        onChange={() => undefined}
-      />
-    </section>
+    <Button type="button" appearance="outline" onClick={onOpenStates}>
+      <ArrowSquareOutIcon aria-hidden="true" /> Zobacz stany integracji
+    </Button>
   </div>
 )

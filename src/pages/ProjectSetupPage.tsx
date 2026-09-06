@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Dialog } from '../components/Dialog'
 import { SetupLayout, type SetupStep } from '../components/SetupLayout'
+import { TaskManagerStatesPage } from './TaskManagerStatesPage'
 import { AgentStep } from './project-setup/AgentStep'
 import { ProjectStep } from './project-setup/ProjectStep'
 import { RepositoriesStep } from './project-setup/RepositoriesStep'
@@ -38,6 +39,7 @@ export const ProjectSetupPage = ({
   const [error, setError] = useState('')
   const [shortcutsVisible, setShortcutsVisible] = useState(false)
   const [directoryIndex, setDirectoryIndex] = useState<number | null>(null)
+  const [taskStatesOpen, setTaskStatesOpen] = useState(false)
   const headingRef = useRef<HTMLHeadingElement>(null)
 
   useEffect(() => {
@@ -90,6 +92,13 @@ export const ProjectSetupPage = ({
       if (event.key === '?' && !editing) {
         event.preventDefault()
         setShortcutsVisible((visible) => !visible)
+      }
+      if (taskStatesOpen) {
+        if (event.key === 'Escape' || event.key === 'Backspace') {
+          event.preventDefault()
+          setTaskStatesOpen(false)
+        }
+        return
       }
       if (directoryIndex !== null) return
       if (/^[1-6]$/.test(event.key) && !editing) {
@@ -148,6 +157,9 @@ export const ProjectSetupPage = ({
     'Sprawdź konfigurację. Projekt zostanie zapisany dopiero po zatwierdzeniu.',
   ]
 
+  if (taskStatesOpen)
+    return <TaskManagerStatesPage onBack={() => setTaskStatesOpen(false)} />
+
   return (
     <>
       <SetupLayout
@@ -192,6 +204,7 @@ export const ProjectSetupPage = ({
             onChange={setTaskProvider}
             account={taskAccount}
             onAccountChange={setTaskAccount}
+            onOpenStates={() => setTaskStatesOpen(true)}
             shortcutsVisible={shortcutsVisible}
           />
         )}
