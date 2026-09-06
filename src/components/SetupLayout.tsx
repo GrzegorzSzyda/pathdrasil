@@ -81,21 +81,20 @@ export const SetupLayout = ({
         >
           <div className="flex-1">{children}</div>
           <footer className="mt-10 flex items-center justify-between gap-4 pt-5">
-            <span className="relative">
-              <Button
-                type="button"
-                appearance="ghost"
-                onClick={onBack}
-                disabled={activeStep === 0}
-              >
-                <ArrowLeftIcon aria-hidden="true" /> Wstecz
-              </Button>
-              {shortcutsVisible && (
-                <Kbd className="absolute top-1/2 left-full ml-2 -translate-y-1/2">
-                  Esc / ⌫
-                </Kbd>
-              )}
-            </span>
+            {activeStep > 0 ? (
+              <span className="relative">
+                <Button type="button" appearance="ghost" onClick={onBack}>
+                  <ArrowLeftIcon aria-hidden="true" /> Wstecz
+                </Button>
+                {shortcutsVisible && (
+                  <Kbd className="absolute top-1/2 left-full ml-2 -translate-y-1/2">
+                    Esc / ⌫
+                  </Kbd>
+                )}
+              </span>
+            ) : (
+              <span aria-hidden="true" />
+            )}
             <span className="relative">
               <Button type="button" onClick={onNext} disabled={!canNext}>
                 <span>{nextLabel}</span>
