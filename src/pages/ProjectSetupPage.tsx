@@ -18,7 +18,6 @@ import {
   type ProviderOption,
 } from '../components/ProviderPicker'
 import { SetupLayout, type SetupStep } from '../components/SetupLayout'
-import { ShortcutHelpDialog } from '../components/ShortcutHelpDialog'
 
 type RepositoryDraft = { path: string; worktree: string }
 
@@ -99,7 +98,7 @@ export const ProjectSetupPage = ({
   const [language, setLanguage] = useState('Polski')
   const [autonomy, setAutonomy] = useState('pytaj-przed-publikacja')
   const [error, setError] = useState('')
-  const [helpOpen, setHelpOpen] = useState(false)
+  const [shortcutsVisible, setShortcutsVisible] = useState(false)
   const [directoryIndex, setDirectoryIndex] = useState<number | null>(null)
   const headingRef = useRef<HTMLHeadingElement>(null)
 
@@ -115,9 +114,16 @@ export const ProjectSetupPage = ({
         target.isContentEditable
       if (event.key === '?' && !editing) {
         event.preventDefault()
-        setHelpOpen(true)
+        setShortcutsVisible((visible) => !visible)
       }
-      if (event.key === 'Escape' && !helpOpen && activeStep === 0) onCancel()
+      if (directoryIndex !== null) return
+      if ((event.key === 'Escape' || event.key === 'Backspace') && !editing) {
+        event.preventDefault()
+        if (activeStep === 0) onCancel()
+        else setActiveStep((step) => step - 1)
+        setError('')
+        return
+      }
       if (event.altKey && event.key === 'ArrowLeft' && activeStep > 0) {
         event.preventDefault()
         setError('')
@@ -200,7 +206,8 @@ export const ProjectSetupPage = ({
         onNext={advance}
         canNext={canContinue(activeStep)}
         nextLabel={activeStep === steps.length - 1 ? 'Utwórz projekt' : 'Dalej'}
-        onHelp={() => setHelpOpen(true)}
+        onToggleShortcuts={() => setShortcutsVisible((visible) => !visible)}
+        shortcutsVisible={shortcutsVisible}
       >
         <h2
           ref={headingRef}
@@ -440,7 +447,6 @@ export const ProjectSetupPage = ({
           </p>
         )}
       </SetupLayout>
-      <ShortcutHelpDialog open={helpOpen} onClose={() => setHelpOpen(false)} />
       <Dialog
         open={directoryIndex !== null}
         onClose={() => setDirectoryIndex(null)}

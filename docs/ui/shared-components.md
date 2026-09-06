@@ -12,7 +12,7 @@ Te elementy tworzą kontrakt wykorzystywany przez wszystkie strony i powinny pow
 6. **`ProviderOption` / `ProviderPicker`** — wybór jednego providera, obsługa `disabled`, etykiety „Wkrótce” oraz tekstowej przyczyny niedostępności.
 7. **`Topbar`** — stały pasek aplikacji z marką, semantycznym `Heading` i akcją pomocy.
 8. **`SetupLayout`** — wskaźnik postępu, obszar treści i stałe akcje poprzednia/dalej.
-9. **rejestr skrótów + `ShortcutHelpDialog`** — jedno źródło prawdy dla nasłuchiwania klawiszy i treści pomocy.
+9. **rejestr skrótów + inline hints** — jedno źródło prawdy dla nasłuchiwania klawiszy i treści skrótów przy akcjach.
 
 ## Komponenty tworzone z pierwszym użyciem
 

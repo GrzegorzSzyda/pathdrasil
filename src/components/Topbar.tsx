@@ -1,13 +1,19 @@
 import { QuestionIcon, TreeStructureIcon } from '@phosphor-icons/react'
 import { Button } from './Button'
 import { Heading } from './Heading'
+import { Kbd } from './Kbd'
 
-type TopbarProps = { title?: string; onHelp?: () => void }
+type TopbarProps = {
+  title?: string
+  onToggleShortcuts?: () => void
+  shortcutsVisible?: boolean
+}
 
 /** Stały pasek aplikacji obecny na każdym widoku. */
 export const Topbar = ({
   title = 'Pathdrasil',
-  onHelp,
+  onToggleShortcuts,
+  shortcutsVisible = false,
 }: TopbarProps): React.JSX.Element => (
   <header
     className="border-border/50 flex min-h-16 items-center justify-between gap-4 border-b pb-4"
@@ -24,15 +30,17 @@ export const Topbar = ({
         {title}
       </Heading>
     </div>
-    {onHelp && (
+    {onToggleShortcuts && (
       <Button
         type="button"
         appearance="ghost"
-        size="icon"
-        aria-label="Skróty klawiaturowe"
-        onClick={onHelp}
+        aria-pressed={shortcutsVisible}
+        aria-label="Pokaż skróty klawiaturowe"
+        onClick={onToggleShortcuts}
       >
         <QuestionIcon aria-hidden="true" />
+        <span className="hidden sm:inline">Skróty</span>
+        <Kbd>?</Kbd>
       </Button>
     )}
   </header>

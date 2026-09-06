@@ -16,16 +16,16 @@ Skróty literowe nie uruchamiają się podczas pisania w `input`, `textarea`, `s
 
 ## Pomoc pod `?`
 
-- Pomoc jest dialogiem modalnym z tytułem „Skróty klawiaturowe”.
-- Zawiera sekcję globalną oraz sekcję aktualnego widoku.
+- `?` przełącza widoczność skrótów bez otwierania modala ani nakładki.
+- Skróty pojawiają się bezpośrednio przy akcjach dostępnych w aktualnym widoku.
 - Pokazuje tylko akcje faktycznie dostępne w bieżącym stanie.
-- Po zamknięciu focus wraca do elementu aktywnego przed otwarciem.
-- Ikona lub przycisk pomocy jest dostępny także dla użytkowników myszy.
+- Przycisk „Skróty” w topbarze pozwala przełączyć ten sam stan także myszą.
 
 ## Focus
 
 - Po otwarciu strony kreatora focus trafia programowo na nagłówek strony (`tabIndex=-1`).
 - Kolejność Tab odpowiada kolejności wizualnej.
+- `Escape` i `Backspace` cofają do poprzedniej strony, gdy focus nie jest w polu edycyjnym.
 - Nieaktywne providery używają natywnego `disabled`; opis stanu pozostaje dostępny dla czytnika ekranu poza nieaktywną kontrolką.
 - Błąd walidacji przenosi focus do podsumowania błędów, a komunikaty są powiązane z polami przez `aria-describedby`.
 

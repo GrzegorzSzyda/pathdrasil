@@ -13,6 +13,7 @@ import './tailwind.css'
 
 const App = (): React.JSX.Element => {
   const [view, setView] = useState<'welcome' | 'setup' | 'complete'>('welcome')
+  const [shortcutsVisible, setShortcutsVisible] = useState(false)
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       const target = event.target as HTMLElement
@@ -26,6 +27,10 @@ const App = (): React.JSX.Element => {
       ) {
         event.preventDefault()
         setView('setup')
+      }
+      if (view === 'welcome' && !editing && event.key === '?') {
+        event.preventDefault()
+        setShortcutsVisible((visible) => !visible)
       }
     }
     document.addEventListener('keydown', onKeyDown)
@@ -43,7 +48,11 @@ const App = (): React.JSX.Element => {
     return (
       <main className="bg-welcome text-text min-h-screen px-6 py-6 sm:px-10">
         <div className="mx-auto flex min-h-[calc(100vh-3rem)] w-full max-w-6xl flex-col">
-          <Topbar title="Projekt utworzony" />
+          <Topbar
+            title="Projekt utworzony"
+            onToggleShortcuts={() => setShortcutsVisible((visible) => !visible)}
+            shortcutsVisible={shortcutsVisible}
+          />
           <div className="grid flex-1 place-items-center p-6">
             <div className="grid max-w-md gap-5 text-center">
               <CheckCircleIcon
@@ -67,7 +76,13 @@ const App = (): React.JSX.Element => {
         </div>
       </main>
     )
-  return <WelcomePage onCreate={() => setView('setup')} />
+  return (
+    <WelcomePage
+      onCreate={() => setView('setup')}
+      onToggleShortcuts={() => setShortcutsVisible((visible) => !visible)}
+      shortcutsVisible={shortcutsVisible}
+    />
+  )
 }
 
 createRoot(document.getElementById('root')!).render(

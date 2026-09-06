@@ -14,7 +14,8 @@ type SetupLayoutProps = {
   onNext: () => void
   canNext: boolean
   nextLabel: string
-  onHelp: () => void
+  onToggleShortcuts: () => void
+  shortcutsVisible: boolean
   children: ReactNode
 }
 
@@ -26,12 +27,17 @@ export const SetupLayout = ({
   onNext,
   canNext,
   nextLabel,
-  onHelp,
+  onToggleShortcuts,
+  shortcutsVisible,
   children,
 }: SetupLayoutProps): React.JSX.Element => (
   <main className="bg-page text-text min-h-screen">
     <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-6 py-6 sm:px-10">
-      <Topbar title="Nowy projekt" onHelp={onHelp} />
+      <Topbar
+        title="Nowy projekt"
+        onToggleShortcuts={onToggleShortcuts}
+        shortcutsVisible={shortcutsVisible}
+      />
       <div className="grid flex-1 gap-10 py-10 lg:grid-cols-[220px_1fr]">
         <nav aria-label="Etapy tworzenia projektu">
           <ol className="grid gap-2">
@@ -86,13 +92,14 @@ export const SetupLayout = ({
               onClick={onBack}
               disabled={activeStep === 0}
             >
-              <ArrowLeftIcon aria-hidden="true" /> Wstecz <Kbd>Alt ←</Kbd>
+              <ArrowLeftIcon aria-hidden="true" /> Wstecz
+              {shortcutsVisible && <Kbd>Esc / ⌫</Kbd>}
             </Button>
             <Button type="button" onClick={onNext} disabled={!canNext}>
               <span>{nextLabel}</span>
               {activeStep < steps.length - 1 && (
                 <>
-                  <Kbd>Alt →</Kbd>
+                  {shortcutsVisible && <Kbd>Alt →</Kbd>}
                   <ArrowRightIcon aria-hidden="true" />
                 </>
               )}
