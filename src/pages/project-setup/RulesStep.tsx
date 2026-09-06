@@ -1,5 +1,6 @@
-import { FormField, fieldClassName } from '../../components/FormField'
+import { FormField } from '../../components/FormField'
 import { InlineAlert } from '../../components/InlineAlert'
+import { inputClassName } from '../../components/Input'
 import type { StepCommonProps } from './types'
 
 type Props = StepCommonProps & {
@@ -18,7 +19,7 @@ export const RulesStep = ({
     <FormField id="language" label="Domyślny język projektu">
       <select
         id="language"
-        className={fieldClassName()}
+        className={inputClassName()}
         value={language}
         onChange={(event) => onLanguageChange(event.target.value)}
       >
@@ -29,7 +30,7 @@ export const RulesStep = ({
     <FormField id="autonomy" label="Poziom autonomii">
       <select
         id="autonomy"
-        className={fieldClassName()}
+        className={inputClassName()}
         value={autonomy}
         onChange={(event) => onAutonomyChange(event.target.value)}
       >

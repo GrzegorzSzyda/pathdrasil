@@ -11,11 +11,11 @@
 | kreator                 | `Alt+ArrowRight`    | następna strona, jeżeli jest poprawna       |
 | lista opcji             | strzałki            | zmień aktywną opcję zgodnie ze wzorcem ARIA |
 | kontrolka               | `Enter` lub `Space` | aktywuj kontrolkę                           |
-| kreator                 | `1`–`6`             | przejdź do ukończonego lub bieżącego kroku  |
+| kreator                 | `1`–`6`             | przejdź do odblokowanego kroku              |
 
 Skróty literowe nie uruchamiają się podczas pisania w `input`, `textarea`, `select` ani w elemencie edytowalnym. Samych `ArrowLeft` i `ArrowRight` nie przeznaczamy do zmiany stron, ponieważ są potrzebne do edycji tekstu i obsługi kontrolek.
 
-Numery nie omijają walidacji ani nie otwierają jeszcze nieukończonego kroku.
+Numery nie omijają walidacji ani nie otwierają jeszcze nieodblokowanego kroku. Po odblokowaniu dane kroku są zachowane i można do niego wracać.
 
 ## Pomoc pod `?`
 

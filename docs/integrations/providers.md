@@ -5,6 +5,7 @@
 | Domena       | Provider      | Stan                 | Sposób połączenia                          |
 | ------------ | ------------- | -------------------- | ------------------------------------------ |
 | Task manager | GitHub Issues | dostępny             | lokalnie autoryzowane `gh`                 |
+| Task manager | GitLab Issues | dostępny             | lokalnie autoryzowane `glab`               |
 | Task manager | Linear        | wkrótce              | kontrolka nieaktywna                       |
 | Repozytoria  | GitHub        | dostępny             | lokalnie autoryzowane `gh` i lokalny `git` |
 | Repozytoria  | GitLab        | wkrótce              | kontrolka nieaktywna                       |

@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Dialog } from '../components/Dialog'
 import { SetupLayout, type SetupStep } from '../components/SetupLayout'
-import { TaskManagerStatesPage } from './TaskManagerStatesPage'
 import { AgentStep } from './project-setup/AgentStep'
 import { ProjectStep } from './project-setup/ProjectStep'
 import { RepositoriesStep } from './project-setup/RepositoriesStep'
@@ -11,12 +10,12 @@ import { TaskManagerStep } from './project-setup/TaskManagerStep'
 import type { RepositoryDraft } from './project-setup/types'
 
 const steps: SetupStep[] = [
-  { title: 'Projekt', description: 'Podstawowe informacje' },
-  { title: 'Task manager', description: 'Źródło tasków' },
-  { title: 'Repozytoria', description: 'Kod i worktree' },
-  { title: 'Agent', description: 'Wykonawca pracy' },
-  { title: 'Reguły', description: 'Język i autonomia' },
-  { title: 'Podsumowanie', description: 'Sprawdź i utwórz' },
+  { title: 'Projekt' },
+  { title: 'Menedżer zadań' },
+  { title: 'Repozytoria' },
+  { title: 'Agent' },
+  { title: 'Reguły' },
+  { title: 'Podsumowanie' },
 ]
 
 type ProjectSetupPageProps = { onCancel: () => void; onComplete: () => void }
@@ -26,9 +25,10 @@ export const ProjectSetupPage = ({
   onComplete,
 }: ProjectSetupPageProps): React.JSX.Element => {
   const [activeStep, setActiveStep] = useState(0)
+  const [maxUnlockedStep, setMaxUnlockedStep] = useState(0)
   const [projectName, setProjectName] = useState('')
   const [taskProvider, setTaskProvider] = useState('github-issues')
-  const [taskAccount, setTaskAccount] = useState('gh-grzegorz')
+  const [taskAccount, setTaskAccount] = useState('')
   const [repoProvider, setRepoProvider] = useState('github')
   const [repositories, setRepositories] = useState<RepositoryDraft[]>([
     { path: '', worktree: '' },
@@ -39,7 +39,6 @@ export const ProjectSetupPage = ({
   const [error, setError] = useState('')
   const [shortcutsVisible, setShortcutsVisible] = useState(false)
   const [directoryIndex, setDirectoryIndex] = useState<number | null>(null)
-  const [taskStatesOpen, setTaskStatesOpen] = useState(false)
   const headingRef = useRef<HTMLHeadingElement>(null)
 
   useEffect(() => {
@@ -80,6 +79,7 @@ export const ProjectSetupPage = ({
   const advance = () => {
     if (!validate()) return
     if (activeStep === steps.length - 1) return onComplete()
+    setMaxUnlockedStep((step) => Math.max(step, activeStep + 1))
     setActiveStep((step) => step + 1)
   }
 
@@ -93,17 +93,10 @@ export const ProjectSetupPage = ({
         event.preventDefault()
         setShortcutsVisible((visible) => !visible)
       }
-      if (taskStatesOpen) {
-        if (event.key === 'Escape' || event.key === 'Backspace') {
-          event.preventDefault()
-          setTaskStatesOpen(false)
-        }
-        return
-      }
       if (directoryIndex !== null) return
       if (/^[1-6]$/.test(event.key) && !editing) {
         const requestedStep = Number(event.key) - 1
-        if (requestedStep <= activeStep) {
+        if (requestedStep <= maxUnlockedStep) {
           event.preventDefault()
           setError('')
           setActiveStep(requestedStep)
@@ -148,26 +141,15 @@ export const ProjectSetupPage = ({
     setError('')
   }
 
-  const descriptions = [
-    'Utwórz odseparowaną przestrzeń dla tasków, repozytoriów i agentów.',
-    'Wybierz narzędzie i konto, z którego Pathdrasil będzie pobierał taski.',
-    'Dodaj jedno lub więcej repozytoriów należących do tego projektu.',
-    'Wybierz lokalnego agenta, który będzie wykonywał zaplanowaną pracę.',
-    'Ustal domyślny język i poziom autonomii dla tego projektu.',
-    'Sprawdź konfigurację. Projekt zostanie zapisany dopiero po zatwierdzeniu.',
-  ]
-
-  if (taskStatesOpen)
-    return <TaskManagerStatesPage onBack={() => setTaskStatesOpen(false)} />
-
   return (
     <>
       <SetupLayout
         steps={steps}
         activeStep={activeStep}
+        maxUnlockedStep={maxUnlockedStep}
         onStepChange={(step) => {
           setError('')
-          setActiveStep(step)
+          if (step <= maxUnlockedStep) setActiveStep(step)
         }}
         onBack={() =>
           activeStep > 0 ? setActiveStep((step) => step - 1) : onCancel()
@@ -184,9 +166,6 @@ export const ProjectSetupPage = ({
         >
           {steps[activeStep].title}
         </h2>
-        <p className="text-muted mt-4 mb-8 text-base leading-relaxed">
-          {descriptions[activeStep]}
-        </p>
         {activeStep === 0 && (
           <ProjectStep
             value={projectName}
@@ -204,7 +183,6 @@ export const ProjectSetupPage = ({
             onChange={setTaskProvider}
             account={taskAccount}
             onAccountChange={setTaskAccount}
-            onOpenStates={() => setTaskStatesOpen(true)}
             shortcutsVisible={shortcutsVisible}
           />
         )}

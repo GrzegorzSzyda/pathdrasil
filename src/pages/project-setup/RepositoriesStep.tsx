@@ -5,8 +5,9 @@ import {
   XIcon,
 } from '@phosphor-icons/react'
 import { Button } from '../../components/Button'
-import { FormField, TextInput } from '../../components/FormField'
+import { FormField } from '../../components/FormField'
 import { InlineAlert } from '../../components/InlineAlert'
+import { Input } from '../../components/Input'
 import {
   ProviderPicker,
   type ProviderOption,
@@ -86,7 +87,7 @@ export const RepositoriesStep = ({
           required
         >
           <div className="flex gap-2">
-            <TextInput
+            <Input
               id={`repo-path-${index}`}
               value={repo.path}
               onChange={(event) => onUpdate(index, 'path', event.target.value)}
@@ -108,7 +109,7 @@ export const RepositoriesStep = ({
           hint="Katalog roboczy dla agenta"
           required
         >
-          <TextInput
+          <Input
             id={`worktree-path-${index}`}
             value={repo.worktree}
             onChange={(event) =>

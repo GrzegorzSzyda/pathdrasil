@@ -4,11 +4,12 @@ import { Button } from './Button'
 import { Kbd } from './Kbd'
 import { Topbar } from './Topbar'
 
-export type SetupStep = { title: string; description: string }
+export type SetupStep = { title: string }
 
 type SetupLayoutProps = {
   steps: SetupStep[]
   activeStep: number
+  maxUnlockedStep: number
   onStepChange: (step: number) => void
   onBack: () => void
   onNext: () => void
@@ -21,6 +22,7 @@ type SetupLayoutProps = {
 export const SetupLayout = ({
   steps,
   activeStep,
+  maxUnlockedStep,
   onStepChange,
   onBack,
   onNext,
@@ -42,9 +44,11 @@ export const SetupLayout = ({
                 <li key={step.title}>
                   <button
                     type="button"
-                    disabled={index > activeStep}
+                    disabled={index > maxUnlockedStep}
                     aria-current={active ? 'step' : undefined}
-                    onClick={() => index <= activeStep && onStepChange(index)}
+                    onClick={() =>
+                      index <= maxUnlockedStep && onStepChange(index)
+                    }
                     className="text-left disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     <span
@@ -59,9 +63,6 @@ export const SetupLayout = ({
                         <span className="block text-sm font-semibold">
                           {step.title}
                         </span>
-                        <span className="text-muted block text-xs">
-                          {step.description}
-                        </span>
                       </span>
                     </span>
                   </button>
@@ -69,10 +70,6 @@ export const SetupLayout = ({
               )
             })}
           </ol>
-          <p className="text-muted mt-8 text-xs leading-relaxed">
-            Każda strona dotyczy jednej domeny. Dane zapiszą się dopiero po
-            zatwierdzeniu podsumowania.
-          </p>
         </nav>
         <section
           id="setup-content"

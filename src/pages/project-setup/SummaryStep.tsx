@@ -41,7 +41,11 @@ export const SummaryStep = ({
       value={projectName || '—'}
       icon={<SlidersHorizontalIcon />}
     />
-    <Row label="Task manager" value="GitHub Issues" icon={<GithubLogoIcon />} />
+    <Row
+      label="Menedżer zadań"
+      value="GitHub Issues"
+      icon={<GithubLogoIcon />}
+    />
     <Row
       label="Repozytoria"
       value={`${repositoriesCount} ${repositoriesCount === 1 ? 'repozytorium' : 'repozytoria'}`}

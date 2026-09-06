@@ -1,4 +1,5 @@
-import { FormField, TextInput } from '../../components/FormField'
+import { FormField } from '../../components/FormField'
+import { Input } from '../../components/Input'
 import type { StepCommonProps } from './types'
 
 type Props = StepCommonProps & {
@@ -13,7 +14,7 @@ export const ProjectStep = ({
   hasError,
 }: Props): React.JSX.Element => (
   <FormField id="project-name" label="Nazwa projektu" required>
-    <TextInput
+    <Input
       id="project-name"
       value={value}
       onChange={(event) => onChange(event.target.value)}
