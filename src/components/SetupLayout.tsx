@@ -30,9 +30,9 @@ export const SetupLayout = ({
   children,
 }: SetupLayoutProps): React.JSX.Element => (
   <main className="bg-page text-text min-h-screen">
-    <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-6 py-6 sm:px-10">
+    <div className="flex min-h-screen w-full flex-col px-6 py-6 sm:px-10">
       <Topbar />
-      <div className="grid flex-1 gap-10 py-10 lg:grid-cols-[220px_1fr]">
+      <div className="mx-auto grid w-full max-w-6xl flex-1 gap-10 py-10 lg:grid-cols-[220px_1fr]">
         <nav aria-label="Etapy tworzenia projektu">
           <ol className="grid gap-2">
             {steps.map((step, index) => {
