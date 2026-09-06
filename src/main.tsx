@@ -48,11 +48,7 @@ const App = (): React.JSX.Element => {
     return (
       <main className="bg-welcome text-text min-h-screen px-6 py-6 sm:px-10">
         <div className="mx-auto flex min-h-[calc(100vh-3rem)] w-full max-w-6xl flex-col">
-          <Topbar
-            title="Projekt utworzony"
-            onToggleShortcuts={() => setShortcutsVisible((visible) => !visible)}
-            shortcutsVisible={shortcutsVisible}
-          />
+          <Topbar title="Pathdrasil" />
           <div className="grid flex-1 place-items-center p-6">
             <div className="grid max-w-md gap-5 text-center">
               <CheckCircleIcon
@@ -79,7 +75,6 @@ const App = (): React.JSX.Element => {
   return (
     <WelcomePage
       onCreate={() => setView('setup')}
-      onToggleShortcuts={() => setShortcutsVisible((visible) => !visible)}
       shortcutsVisible={shortcutsVisible}
     />
   )

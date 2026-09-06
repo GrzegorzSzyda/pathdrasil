@@ -210,7 +210,6 @@ export const ProjectSetupPage = ({
         onNext={advance}
         canNext={canContinue(activeStep)}
         nextLabel={activeStep === steps.length - 1 ? 'Utwórz projekt' : 'Dalej'}
-        onToggleShortcuts={() => setShortcutsVisible((visible) => !visible)}
         shortcutsVisible={shortcutsVisible}
       >
         <h2

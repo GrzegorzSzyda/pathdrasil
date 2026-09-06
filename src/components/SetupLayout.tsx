@@ -14,7 +14,6 @@ type SetupLayoutProps = {
   onNext: () => void
   canNext: boolean
   nextLabel: string
-  onToggleShortcuts: () => void
   shortcutsVisible: boolean
   children: ReactNode
 }
@@ -27,17 +26,12 @@ export const SetupLayout = ({
   onNext,
   canNext,
   nextLabel,
-  onToggleShortcuts,
   shortcutsVisible,
   children,
 }: SetupLayoutProps): React.JSX.Element => (
   <main className="bg-page text-text min-h-screen">
     <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-6 py-6 sm:px-10">
-      <Topbar
-        title="Nowy projekt"
-        onToggleShortcuts={onToggleShortcuts}
-        shortcutsVisible={shortcutsVisible}
-      />
+      <Topbar />
       <div className="grid flex-1 gap-10 py-10 lg:grid-cols-[220px_1fr]">
         <nav aria-label="Etapy tworzenia projektu">
           <ol className="grid gap-2">
@@ -86,7 +80,7 @@ export const SetupLayout = ({
           aria-label={steps[activeStep]?.title}
         >
           <div className="flex-1">{children}</div>
-          <footer className="border-border mt-10 flex items-center justify-between gap-4 border-t pt-5">
+          <footer className="mt-10 flex items-center justify-between gap-4 pt-5">
             <span className="relative">
               <Button
                 type="button"

@@ -19,7 +19,7 @@ Skróty literowe nie uruchamiają się podczas pisania w `input`, `textarea`, `s
 - `?` przełącza widoczność skrótów bez otwierania modala ani nakładki.
 - Skróty pojawiają się bezpośrednio przy akcjach dostępnych w aktualnym widoku.
 - Pokazuje tylko akcje faktycznie dostępne w bieżącym stanie.
-- Przycisk „Skróty” w topbarze pozwala przełączyć ten sam stan także myszą.
+- Skróty są przełączane wyłącznie klawiszem `?`; topbar nie zawiera dodatkowego przycisku.
 
 ## Focus
 

@@ -4,7 +4,7 @@
   --font-sans: 'Nunito Sans', ui-rounded, 'Segoe UI', sans-serif;
   --color-page: #10151d;
   --color-page-deep: #151d28;
-  --color-page-glow: #213344;
+  --color-page-glow: #1a2733;
   --color-surface: #243646;
   --color-border: #50677b;
   --color-heading: #cbd5df;
@@ -19,9 +19,9 @@
   --color-danger-ink: #450a0a;
   --color-focus: #b8ead5;
   --background-image-welcome: radial-gradient(
-    circle at 50% 35%,
+    circle at 88% 0%,
     var(--color-page-glow) 0,
-    var(--color-page-deep) 34%,
+    var(--color-page-deep) 22%,
     var(--color-page) 72%
   );
 }

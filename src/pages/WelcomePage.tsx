@@ -6,21 +6,16 @@ import { Topbar } from '../components/Topbar'
 
 type WelcomePageProps = {
   onCreate: () => void
-  onToggleShortcuts: () => void
   shortcutsVisible: boolean
 }
 
 export const WelcomePage = ({
   onCreate,
-  onToggleShortcuts,
   shortcutsVisible,
 }: WelcomePageProps): React.JSX.Element => (
   <main className="bg-welcome text-text min-h-screen px-6 py-8 text-base sm:px-10">
     <div className="flex min-h-[calc(100vh-4rem)] w-full flex-col">
-      <Topbar
-        onToggleShortcuts={onToggleShortcuts}
-        shortcutsVisible={shortcutsVisible}
-      />
+      <Topbar />
       <div className="flex flex-1 flex-col items-center justify-center text-center">
         <Heading as="h2" level="h1">
           Zacznijmy od projektu
