@@ -121,6 +121,11 @@ export const ProjectSetupPage = ({
         setShortcutsVisible((visible) => !visible)
       }
       if (directoryIndex !== null) return
+      if (event.key === 'Enter' && target.tagName !== 'TEXTAREA') {
+        event.preventDefault()
+        advance()
+        return
+      }
       if ((event.key === 'Escape' || event.key === 'Backspace') && !editing) {
         event.preventDefault()
         if (activeStep === 0) onCancel()
