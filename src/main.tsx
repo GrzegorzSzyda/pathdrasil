@@ -1,0 +1,172 @@
+import { StrictMode, useEffect, useState } from 'react'
+import { createRoot } from 'react-dom/client'
+import '@fontsource/nunito-sans/400.css'
+import '@fontsource/nunito-sans/600.css'
+import '@fontsource/nunito-sans/700.css'
+import { CheckCircleIcon } from '@phosphor-icons/react'
+import {
+  BrowserRouter,
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+} from 'react-router-dom'
+import { z } from 'zod'
+import { projectsResponseSchema, type Project } from '../shared/api/projects'
+import { Button } from './components/Button'
+import { Topbar } from './components/Topbar'
+import { requestJson } from './lib/api'
+import { ProjectPage } from './pages/ProjectPage'
+import { ProjectSetupPage } from './pages/ProjectSetupPage'
+import { WelcomePage } from './pages/WelcomePage'
+import './tailwind.css'
+
+const WelcomeRoute = (): React.JSX.Element => {
+  const navigate = useNavigate()
+  const [shortcutsVisible, setShortcutsVisible] = useState(false)
+  const [projects, setProjects] = useState<Project[]>([])
+  const [projectsError, setProjectsError] = useState('')
+  useEffect(() => {
+    let active = true
+    requestJson('/api/projects', projectsResponseSchema)
+      .then(({ projects: loadedProjects }) => {
+        if (!active) return
+        setProjects(loadedProjects)
+        setProjectsError('')
+      })
+      .catch((error: unknown) => {
+        if (!active) return
+        setProjectsError(
+          error instanceof Error
+            ? error.message
+            : 'Nie udało się pobrać projektów.',
+        )
+      })
+    return () => {
+      active = false
+    }
+  }, [])
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement
+      const editing =
+        ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName) ||
+        target.isContentEditable
+      if (editing) return
+      if (event.key === '?') {
+        event.preventDefault()
+        setShortcutsVisible((visible) => !visible)
+      }
+      if (
+        !editing &&
+        projects.length > 0 &&
+        (event.key === 'ArrowDown' || event.key === 'ArrowUp')
+      ) {
+        const projectButtons = Array.from(
+          document.querySelectorAll<HTMLButtonElement>('[data-project-item]'),
+        )
+        if (projectButtons.length === 0) return
+        const currentIndex = projectButtons.indexOf(
+          document.activeElement as HTMLButtonElement,
+        )
+        const nextIndex =
+          event.key === 'ArrowDown'
+            ? Math.min(
+                currentIndex < 0 ? 0 : currentIndex + 1,
+                projectButtons.length - 1,
+              )
+            : Math.max(currentIndex < 0 ? 0 : currentIndex - 1, 0)
+        event.preventDefault()
+        projectButtons[nextIndex]?.focus()
+        return
+      }
+      if (event.key.toLowerCase() === 'n') {
+        event.preventDefault()
+        navigate('/projects/new')
+      }
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [navigate, projects.length])
+  return (
+    <WelcomePage
+      onCreate={() => navigate('/projects/new')}
+      onOpen={(id) => navigate(`/projects/${id}`)}
+      onDelete={async (project) => {
+        await requestJson(
+          `/api/projects/${encodeURIComponent(project.id)}`,
+          z.object({ deleted: z.literal(true) }),
+          {
+            method: 'DELETE',
+          },
+        )
+        setProjects((current) => current.filter(({ id }) => id !== project.id))
+      }}
+      projects={projects}
+      projectsError={projectsError}
+      shortcutsVisible={shortcutsVisible}
+    />
+  )
+}
+
+const CreatedRoute = (): React.JSX.Element => {
+  const navigate = useNavigate()
+  return (
+    <main className="bg-welcome text-text min-h-screen px-6 py-6 sm:px-10">
+      <Topbar />
+      <div className="mx-auto flex min-h-[calc(100vh-3rem)] w-full max-w-6xl flex-col">
+        <div className="grid flex-1 place-items-center p-6">
+          <div className="grid max-w-md gap-5 text-center">
+            <CheckCircleIcon
+              className="text-brand mx-auto"
+              size={56}
+              weight="duotone"
+              aria-hidden="true"
+            />
+            <h2 className="text-heading text-4xl font-semibold">
+              Projekt utworzony
+            </h2>
+            <p className="text-muted">
+              Konfiguracja została przygotowana. Synchronizacja integracji
+              będzie kolejnym krokiem.
+            </p>
+            <Button type="button" onClick={() => navigate('/')}>
+              Wróć do projektów
+            </Button>
+          </div>
+        </div>
+      </div>
+    </main>
+  )
+}
+
+const SetupRoute = (): React.JSX.Element => {
+  const navigate = useNavigate()
+  return (
+    <ProjectSetupPage
+      onCancel={() => navigate('/')}
+      onComplete={(projectId) => navigate(`/projects/${projectId}`)}
+    />
+  )
+}
+
+const App = (): React.JSX.Element => {
+  const location = useLocation()
+  return (
+    <Routes location={location}>
+      <Route path="/" element={<WelcomeRoute />} />
+      <Route path="/projects/new/*" element={<SetupRoute />} />
+      <Route path="/projects/:id" element={<ProjectPage />} />
+      <Route path="/projects/created" element={<CreatedRoute />} />
+      <Route path="*" element={<WelcomeRoute />} />
+    </Routes>
+  )
+}
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  </StrictMode>,
+)

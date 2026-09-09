@@ -1,30 +1,66 @@
 # Pathdrasil
 
-Keyboard-first prototype for coordinating software tasks, AI agents, repositories, reviews, and delivery in one workflow.
+Lokalna aplikacja webowa do organizowania pracy programistycznej wykonywanej
+przez agentów AI. Repozytorium jest pojedynczym pakietem z frontendem React,
+backendem Hono i wspólnymi kontraktami TypeScript.
 
-## Live demo
+## Wymagania
 
-[Open Pathdrasil](https://grzegorzszyda.github.io/pathdrasil/)
+- Node.js 22 LTS,
+- Bun,
+- Git,
+- opcjonalnie autoryzowany `gh` i/lub `glab`.
 
-## Current prototype
+Pathdrasil korzysta z istniejącej autoryzacji CLI. Nie kopiuje ani nie zapisuje
+tokenów providerów.
 
-- workflow board with contextual task actions;
-- task detail and full-screen workspace;
-- dashboard with current and recently completed work;
-- project picker and a three-step project/integration setup flow;
-- workflow graph;
-- keyboard navigation throughout the main views.
+## Uruchomienie
 
-## Keyboard shortcuts
+```bash
+bun install
+bun run dev
+```
 
-- `N` — create a project from the project picker;
-- `/` — search projects on the project picker;
-- `D` — dashboard;
-- `W` — workflow;
-- `G` — workflow graph;
-- `F` — open the selected task full screen;
-- `Ctrl + Left/Right` — switch between tasks while details are open;
-- `A` — focus contextual actions;
-- `?` — show contextual shortcut hints.
+Frontend działa przez Vite, a żądania `/api` są przekazywane do backendu na
+`127.0.0.1:4310`.
 
-The prototype is currently implemented as static HTML, CSS, and JavaScript.
+Najważniejsze komendy:
+
+```bash
+bun run dev          # frontend i backend
+bun run test         # testy Vitest
+bun run test:e2e     # przepływy i snapshoty wizualne Playwright
+bun run test:e2e:update # świadoma aktualizacja obrazów po zmianie UI
+bun run lint         # ESLint
+bun run typecheck    # frontend, shared i backend
+bun run build        # produkcyjny build obu części
+bun run check        # pełna kontrola jakości
+```
+
+Snapshoty Playwrighta są przechowywane w `e2e/screenshots`. Dzięki temu zmiana
+wyglądu trafia do diffu pull requesta razem z kodem. Workflow CI porównuje
+aktualny interfejs z zapisanymi obrazami i dołącza raport Playwrighta jako
+artefakt, jeśli test E2E się nie powiedzie.
+
+## Struktura
+
+```text
+src/       frontend React
+server/    lokalny backend Node/Hono
+shared/    schematy Zod i typy kontraktów API
+docs/      dokumentacja domenowa
+planning/  plany wdrożenia i materiały projektowe
+```
+
+Konfiguracja projektów jest domyślnie zapisywana w
+`~/.local/share/pathdrasil/projects.json` z uprawnieniami `0600`. Lokalizację
+można zmienić przez `PATHDRASIL_DATA_DIR`.
+
+Pozostałe zmienne środowiskowe:
+
+- `PATHDRASIL_HOST` — domyślnie `127.0.0.1`,
+- `PATHDRASIL_PORT` — domyślnie `4310`,
+- `PATHDRASIL_LOG_LEVEL` — domyślnie `info`.
+
+Szczegóły implementacji backendu opisuje
+[planning/BACKEND.md](planning/BACKEND.md).
