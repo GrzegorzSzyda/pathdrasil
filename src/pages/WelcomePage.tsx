@@ -4,6 +4,7 @@ import type { Project } from '../../shared/api/projects'
 import { Button } from '../components/Button'
 import { Dialog } from '../components/Dialog'
 import { Heading } from '../components/Heading'
+import { InlineAlert } from '../components/InlineAlert'
 import { Kbd } from '../components/Kbd'
 import { Topbar } from '../components/Topbar'
 
@@ -12,6 +13,7 @@ type WelcomePageProps = {
   onOpen: (id: string) => void
   onDelete: (project: Project) => Promise<void>
   projects: Project[]
+  projectsError: string
   shortcutsVisible: boolean
 }
 
@@ -20,6 +22,7 @@ export const WelcomePage = ({
   onOpen,
   onDelete,
   projects,
+  projectsError,
   shortcutsVisible,
 }: WelcomePageProps): React.JSX.Element => {
   const firstProjectRef = useRef<HTMLButtonElement>(null)
@@ -57,6 +60,11 @@ export const WelcomePage = ({
         <div className="flex min-h-[calc(100vh-4rem)] w-full flex-col">
           <Topbar />
           <div className="flex flex-1 flex-col items-center justify-center py-12 text-center">
+            {projectsError && (
+              <div className="mb-6 w-full max-w-md text-left">
+                <InlineAlert tone="danger">{projectsError}</InlineAlert>
+              </div>
+            )}
             {projects.length === 0 ? (
               <>
                 <Heading as="h2" level="h1">

@@ -11,6 +11,8 @@
     "build": "bun run typecheck && vite build && tsc -p tsconfig.server.json",
     "typecheck": "tsc --noEmit && tsc -p tsconfig.server.json --noEmit",
     "test": "vitest run",
+    "test:e2e": "playwright test",
+    "test:e2e:update": "playwright test --update-snapshots",
     "lint": "eslint .",
     "check": "bun run lint && bun run format && bun run test && bun run build",
     "format": "prettier --check .",
@@ -33,6 +35,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/vite": "^4.3.3",
     "@trivago/prettier-plugin-sort-imports": "^6.0.2",
     "@types/node": "^26.5.0",

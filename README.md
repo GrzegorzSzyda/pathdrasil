@@ -29,11 +29,18 @@ Najważniejsze komendy:
 ```bash
 bun run dev          # frontend i backend
 bun run test         # testy Vitest
+bun run test:e2e     # przepływy i snapshoty wizualne Playwright
+bun run test:e2e:update # świadoma aktualizacja obrazów po zmianie UI
 bun run lint         # ESLint
 bun run typecheck    # frontend, shared i backend
 bun run build        # produkcyjny build obu części
 bun run check        # pełna kontrola jakości
 ```
+
+Snapshoty Playwrighta są przechowywane w `e2e/screenshots`. Dzięki temu zmiana
+wyglądu trafia do diffu pull requesta razem z kodem. Workflow CI porównuje
+aktualny interfejs z zapisanymi obrazami i dołącza raport Playwrighta jako
+artefakt, jeśli test E2E się nie powiedzie.
 
 ## Struktura
 

@@ -25,13 +25,23 @@ const WelcomeRoute = (): React.JSX.Element => {
   const navigate = useNavigate()
   const [shortcutsVisible, setShortcutsVisible] = useState(false)
   const [projects, setProjects] = useState<Project[]>([])
+  const [projectsError, setProjectsError] = useState('')
   useEffect(() => {
     let active = true
     requestJson('/api/projects', projectsResponseSchema)
       .then(({ projects: loadedProjects }) => {
-        if (active) setProjects(loadedProjects)
+        if (!active) return
+        setProjects(loadedProjects)
+        setProjectsError('')
       })
-      .catch(() => undefined)
+      .catch((error: unknown) => {
+        if (!active) return
+        setProjectsError(
+          error instanceof Error
+            ? error.message
+            : 'Nie udało się pobrać projektów.',
+        )
+      })
     return () => {
       active = false
     }
@@ -93,6 +103,7 @@ const WelcomeRoute = (): React.JSX.Element => {
         setProjects((current) => current.filter(({ id }) => id !== project.id))
       }}
       projects={projects}
+      projectsError={projectsError}
       shortcutsVisible={shortcutsVisible}
     />
   )

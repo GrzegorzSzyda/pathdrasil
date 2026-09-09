@@ -2,10 +2,12 @@ import { useEffect, useRef, useState } from 'react'
 import type { TaskSource } from '../../shared/api/integrations'
 import {
   createProjectRequestSchema,
+  fixedAgentRules,
   projectSchema,
 } from '../../shared/api/projects'
 import {
   directoryListingSchema,
+  repositorySchema,
   type DirectoryListing,
 } from '../../shared/api/repositories'
 import { DirectoryPickerDialog } from '../components/DirectoryPickerDialog'
@@ -56,15 +58,6 @@ export const ProjectSetupPage = ({
   const [taskLanguage, setTaskLanguage] = useState('Polski')
   const [repositoryLanguage, setRepositoryLanguage] = useState('English')
   const [pathdrasilLanguage, setPathdrasilLanguage] = useState('Polski')
-  const [autonomy, setAutonomy] = useState('publikuj-draft-pr-mr')
-  const [permissions, setPermissions] = useState({
-    pushBranch: true,
-    createPullRequest: true,
-    merge: false,
-    respondToReview: false,
-    updateTask: false,
-    sendMessages: false,
-  })
   const [error, setError] = useState('')
   const [shortcutsVisible, setShortcutsVisible] = useState(false)
   const [directoryTarget, setDirectoryTarget] =
@@ -73,6 +66,7 @@ export const ProjectSetupPage = ({
     useState<DirectoryListing | null>(null)
   const [directoryError, setDirectoryError] = useState('')
   const [directoryLoading, setDirectoryLoading] = useState(false)
+  const [validatingRepositories, setValidatingRepositories] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const headingRef = useRef<HTMLHeadingElement>(null)
 
@@ -134,8 +128,7 @@ export const ProjectSetupPage = ({
           taskLanguage,
           repositoryLanguage,
           pathdrasilLanguage,
-          autonomy,
-          permissions,
+          ...fixedAgentRules,
         },
       })
       const project = await requestJson('/api/projects', projectSchema, {
@@ -154,9 +147,34 @@ export const ProjectSetupPage = ({
     }
   }
 
-  const advance = () => {
-    if (submitting) return
+  const advance = async () => {
+    if (submitting || validatingRepositories) return
     if (!validate()) return
+    if (activeStep === 2) {
+      setValidatingRepositories(true)
+      try {
+        await Promise.all(
+          repositories.map((repository) =>
+            requestJson('/api/repositories/verify', repositorySchema, {
+              method: 'POST',
+              body: JSON.stringify({
+                ...repository,
+                provider: repoProvider,
+              }),
+            }),
+          ),
+        )
+      } catch (caught) {
+        setError(
+          caught instanceof Error
+            ? caught.message
+            : 'Nie udało się zweryfikować repozytoriów.',
+        )
+        return
+      } finally {
+        setValidatingRepositories(false)
+      }
+    }
     if (activeStep === steps.length - 1) {
       void createProject()
       return
@@ -191,9 +209,12 @@ export const ProjectSetupPage = ({
         }
         return
       }
-      if (event.key === 'Enter' && target.tagName !== 'TEXTAREA') {
+      if (
+        event.key === 'Enter' &&
+        !['BUTTON', 'SELECT', 'TEXTAREA'].includes(target.tagName)
+      ) {
         event.preventDefault()
-        advance()
+        void advance()
         return
       }
       if (event.key === 'Backspace' && !editing) {
@@ -209,7 +230,7 @@ export const ProjectSetupPage = ({
         canContinue(activeStep)
       ) {
         event.preventDefault()
-        advance()
+        void advance()
       }
     }
     document.addEventListener('keydown', onKeyDown)
@@ -263,14 +284,18 @@ export const ProjectSetupPage = ({
         onBack={() =>
           activeStep > 0 ? setActiveStep((step) => step - 1) : onCancel()
         }
-        onNext={advance}
-        canNext={canContinue(activeStep) && !submitting}
+        onNext={() => void advance()}
+        canNext={
+          canContinue(activeStep) && !submitting && !validatingRepositories
+        }
         nextLabel={
-          activeStep === steps.length - 1
-            ? submitting
-              ? 'Tworzenie…'
-              : 'Utwórz projekt'
-            : 'Dalej'
+          validatingRepositories
+            ? 'Weryfikowanie…'
+            : activeStep === steps.length - 1
+              ? submitting
+                ? 'Tworzenie…'
+                : 'Utwórz projekt'
+              : 'Dalej'
         }
         shortcutsVisible={shortcutsVisible}
       >
@@ -334,22 +359,9 @@ export const ProjectSetupPage = ({
             taskLanguage={taskLanguage}
             repositoryLanguage={repositoryLanguage}
             pathdrasilLanguage={pathdrasilLanguage}
-            autonomy={autonomy}
-            permissions={permissions}
             onTaskLanguageChange={setTaskLanguage}
             onRepositoryLanguageChange={setRepositoryLanguage}
             onPathdrasilLanguageChange={setPathdrasilLanguage}
-            onAutonomyChange={setAutonomy}
-            onPermissionChange={(permission, enabled) =>
-              setPermissions((current) => {
-                const next = { ...current, [permission]: enabled }
-                if (permission === 'pushBranch' && !enabled)
-                  next.createPullRequest = false
-                if (permission === 'createPullRequest' && enabled)
-                  next.pushBranch = true
-                return next
-              })
-            }
             shortcutsVisible={shortcutsVisible}
           />
         )}
@@ -366,12 +378,6 @@ export const ProjectSetupPage = ({
             taskLanguage={taskLanguage}
             repositoryLanguage={repositoryLanguage}
             pathdrasilLanguage={pathdrasilLanguage}
-            autonomy={
-              autonomy === 'publikuj-draft-pr-mr'
-                ? 'pracuj i wystaw draft PR/MR'
-                : autonomy
-            }
-            publishPullRequest={permissions.createPullRequest}
           />
         )}
         {error && (

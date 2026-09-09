@@ -4,6 +4,7 @@ import type {
   Project,
 } from '../../shared/api/projects.js'
 import { AppError } from '../errors/app-error.js'
+import type { IntegrationRegistry } from '../integrations/registry.js'
 import type { RepositoryService } from '../repositories/repository-service.js'
 import type { ProjectStore } from './project-store.js'
 
@@ -11,6 +12,7 @@ export class ProjectService {
   constructor(
     private readonly store: ProjectStore,
     private readonly repositories: RepositoryService,
+    private readonly integrations: IntegrationRegistry,
   ) {}
 
   list(): Promise<Project[]> {
@@ -25,16 +27,39 @@ export class ProjectService {
   }
 
   async create(input: CreateProjectRequest): Promise<Project> {
+    const adapter = this.integrations.get(input.taskManager.providerId)
+    if (!adapter)
+      throw new AppError(
+        'INVALID_PROVIDER',
+        'Nieobsługiwany menedżer zadań.',
+        400,
+      )
+
+    const detected = await adapter.detect()
     if (
-      !input.taskManager.accountId.startsWith(
-        `${input.taskManager.providerId}:`,
+      detected.status !== 'available' ||
+      !detected.accounts.some(
+        (account) =>
+          account.active && account.id === input.taskManager.accountId,
       )
     )
       throw new AppError(
-        'ACCOUNT_PROVIDER_MISMATCH',
-        'Wybrane konto nie należy do menedżera zadań.',
+        'TASK_ACCOUNT_NOT_AVAILABLE',
+        'Wybrane konto menedżera zadań nie jest już aktywne.',
         400,
       )
+
+    const availableSources = await adapter.listSources()
+    const selectedSource = availableSources.find(
+      (source) => source.id === input.taskManager.sources[0].id,
+    )
+    if (!selectedSource)
+      throw new AppError(
+        'TASK_SOURCE_NOT_AVAILABLE',
+        'Wybrane źródło tasków nie jest dostępne dla aktywnego konta.',
+        400,
+      )
+
     const repositories = await Promise.all(
       input.repositories.map((repository) =>
         this.repositories.verify(repository),
@@ -57,6 +82,10 @@ export class ProjectService {
     const project: Project = {
       ...input,
       name: input.name.trim(),
+      taskManager: {
+        ...input.taskManager,
+        sources: [selectedSource],
+      },
       id: randomUUID(),
       repositories,
       createdAt: now,

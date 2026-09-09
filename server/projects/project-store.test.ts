@@ -1,8 +1,8 @@
-import { mkdtemp, stat } from 'node:fs/promises'
+import { mkdtemp, stat, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import type { Project } from '../../shared/api/projects.js'
+import { fixedAgentRules, type Project } from '../../shared/api/projects.js'
 import { ProjectStore } from './project-store.js'
 
 const project: Project = {
@@ -36,15 +36,7 @@ const project: Project = {
     taskLanguage: 'Polski',
     repositoryLanguage: 'English',
     pathdrasilLanguage: 'Polski',
-    autonomy: 'local',
-    permissions: {
-      pushBranch: false,
-      createPullRequest: false,
-      merge: false,
-      respondToReview: false,
-      updateTask: false,
-      sendMessages: false,
-    },
+    ...fixedAgentRules,
   },
   createdAt: '2026-09-08T10:00:00.000Z',
   updatedAt: '2026-09-08T10:00:00.000Z',
@@ -77,5 +69,33 @@ describe('ProjectStore', () => {
     await expect(store.remove(project.id)).resolves.toBe(true)
     await expect(store.list()).resolves.toEqual([])
     await expect(store.remove(project.id)).resolves.toBe(false)
+  })
+
+  it('normalizes the former configurable access profile while reading', async () => {
+    const directory = await mkdtemp(resolve(tmpdir(), 'pathdrasil-store-'))
+    const file = resolve(directory, 'projects.json')
+    const legacyProject = {
+      ...project,
+      rules: {
+        ...project.rules,
+        autonomy: 'local',
+        permissions: {
+          ...project.rules.permissions,
+          pushBranch: false,
+          createPullRequest: false,
+          updateTask: false,
+        },
+      },
+    }
+    await writeFile(file, JSON.stringify({ projects: [legacyProject] }))
+
+    const [loaded] = await new ProjectStore(file).list()
+
+    expect(loaded.rules).toEqual({
+      taskLanguage: 'Polski',
+      repositoryLanguage: 'English',
+      pathdrasilLanguage: 'Polski',
+      ...fixedAgentRules,
+    })
   })
 })

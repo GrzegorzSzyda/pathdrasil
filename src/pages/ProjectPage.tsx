@@ -53,25 +53,35 @@ export const ProjectPage = (): React.JSX.Element => {
 
   useEffect(() => {
     let active = true
-    Promise.all([
+    Promise.allSettled([
       requestJson(`/api/projects/${encodeURIComponent(id)}`, projectSchema),
       requestJson(
         `/api/projects/${encodeURIComponent(id)}/tasks`,
         tasksResponseSchema,
       ),
     ])
-      .then(([nextProject, taskResponse]) => {
+      .then(([projectResult, tasksResult]) => {
         if (!active) return
-        setProject(nextProject)
-        setTasks(taskResponse.tasks)
-      })
-      .catch((caught: unknown) => {
-        if (active)
+        if (projectResult.status === 'fulfilled') {
+          setProject(projectResult.value)
+        } else {
           setError(
-            caught instanceof Error
-              ? caught.message
+            projectResult.reason instanceof Error
+              ? projectResult.reason.message
               : 'Nie udało się otworzyć projektu.',
           )
+          return
+        }
+        if (tasksResult.status === 'fulfilled') {
+          setTasks(tasksResult.value.tasks)
+          setError('')
+        } else {
+          setError(
+            tasksResult.reason instanceof Error
+              ? tasksResult.reason.message
+              : 'Nie udało się zsynchronizować tasków.',
+          )
+        }
       })
       .finally(() => {
         if (active) setLoading(false)

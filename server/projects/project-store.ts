@@ -2,10 +2,27 @@ import { randomUUID } from 'node:crypto'
 import { chmod, mkdir, readFile, rename, writeFile } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
 import { z } from 'zod'
-import { projectSchema, type Project } from '../../shared/api/projects.js'
+import {
+  fixedAgentRules,
+  legacyProjectRulesSchema,
+  projectSchema,
+  type Project,
+} from '../../shared/api/projects.js'
 import { AppError } from '../errors/app-error.js'
 
-const storeSchema = z.object({ projects: z.array(projectSchema) })
+const storedProjectSchema = projectSchema
+  .extend({ rules: legacyProjectRulesSchema })
+  .transform((project): Project => ({
+    ...project,
+    rules: {
+      taskLanguage: project.rules.taskLanguage,
+      repositoryLanguage: project.rules.repositoryLanguage,
+      pathdrasilLanguage: project.rules.pathdrasilLanguage,
+      ...fixedAgentRules,
+    },
+  }))
+
+const storeSchema = z.object({ projects: z.array(storedProjectSchema) })
 
 export class ProjectStore {
   private writeQueue: Promise<unknown> = Promise.resolve()

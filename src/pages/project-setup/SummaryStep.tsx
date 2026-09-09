@@ -32,8 +32,6 @@ type Props = {
   taskLanguage: string
   repositoryLanguage: string
   pathdrasilLanguage: string
-  autonomy: string
-  publishPullRequest: boolean
 }
 export const SummaryStep = ({
   projectName,
@@ -43,8 +41,6 @@ export const SummaryStep = ({
   taskLanguage,
   repositoryLanguage,
   pathdrasilLanguage,
-  autonomy,
-  publishPullRequest,
 }: Props): React.JSX.Element => (
   <div className="grid gap-1">
     <Row
@@ -75,10 +71,9 @@ export const SummaryStep = ({
       value={pathdrasilLanguage}
       icon={<CheckCircleIcon />}
     />
-    <Row label="Autonomia" value={autonomy} icon={<CheckCircleIcon />} />
     <Row
-      label="Publikacja"
-      value={publishPullRequest ? 'draft PR/MR' : 'ręczna'}
+      label="Zakres agenta"
+      value="kod, taski i draft PR/MR"
       icon={<CheckCircleIcon />}
     />
   </div>

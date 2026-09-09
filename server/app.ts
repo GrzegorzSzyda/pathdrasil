@@ -80,6 +80,7 @@ export const createApp = (dependencies: AppDependencies = {}) => {
     new ProjectService(
       new ProjectStore(resolve(config.dataDirectory, 'projects.json')),
       repositories,
+      integrations,
     )
   const tasks = dependencies.tasks ?? new TaskService(runner, projects)
 

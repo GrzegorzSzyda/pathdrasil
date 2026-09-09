@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import type { Project } from '../../shared/api/projects.js'
+import { fixedAgentRules, type Project } from '../../shared/api/projects.js'
 import type { CommandRunner } from '../infrastructure/command-runner.js'
 import type { ProjectService } from '../projects/project-service.js'
 import { TaskService } from './task-service.js'
@@ -35,15 +35,7 @@ const project: Project = {
     taskLanguage: 'Polski',
     repositoryLanguage: 'English',
     pathdrasilLanguage: 'Polski',
-    autonomy: 'local',
-    permissions: {
-      pushBranch: false,
-      createPullRequest: false,
-      merge: false,
-      respondToReview: false,
-      updateTask: false,
-      sendMessages: false,
-    },
+    ...fixedAgentRules,
   },
   createdAt: '2026-09-08T10:00:00.000Z',
   updatedAt: '2026-09-08T10:00:00.000Z',
