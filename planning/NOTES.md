@@ -201,7 +201,9 @@ Po merge aplikacja:
 ## Języki
 
 - Użytkownik wybiera globalny język interfejsu oraz komunikacji AI z aplikacją.
-- Projekt określa domyślny język tasków, dokumentacji, PR/MR i komunikacji zespołowej.
+- Projekt określa osobno język treści zapisywanych w task managerze, język repozytorium oraz język bieżącej pracy w Pathdrasilu.
+- Język repozytorium obejmuje domyślnie commity, PR/MR i dokumentację techniczną.
+- Język pracy w Pathdrasilu obejmuje rozmowy z agentami, plany, pytania i podsumowania.
 - Repozytorium może nadpisać język commitów albo dokumentacji.
 
 ## Poziom autonomii
@@ -216,7 +218,7 @@ Uprawnienia są konfigurowane oddzielnie dla:
 - wykonywania merge,
 - wysyłania wiadomości do ludzi.
 
-Planowane tryby: tylko proponuj, pracuj lokalnie, pytaj przed publikacją oraz pełna automatyzacja. Task może czasowo zaostrzyć politykę projektu, ale nie powinien samodzielnie rozszerzać swoich uprawnień.
+Planowane tryby: tylko proponuj, pracuj lokalnie oraz pracuj i wystaw draft PR/MR. Domyślnie agent może pushować branch roboczy i wystawić lub aktualizować draft PR/MR; merge, odpowiedzi na review, aktualizowanie taska i wiadomości do ludzi pozostają wyłączone. Task może czasowo zaostrzyć politykę projektu, ale nie powinien samodzielnie rozszerzać swoich uprawnień.
 
 ## Reguły projektu i skille
 

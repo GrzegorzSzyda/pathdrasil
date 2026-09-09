@@ -1,5 +1,6 @@
 import { useEffect, useRef, type ReactNode } from 'react'
 import { XIcon } from '@phosphor-icons/react'
+import { cn } from '../lib/cn'
 import { Button } from './Button'
 
 type DialogProps = {
@@ -7,6 +8,7 @@ type DialogProps = {
   title: string
   onClose: () => void
   children: ReactNode
+  size?: 'default' | 'wide'
 }
 
 export const Dialog = ({
@@ -14,6 +16,7 @@ export const Dialog = ({
   title,
   onClose,
   children,
+  size = 'default',
 }: DialogProps): React.JSX.Element | null => {
   const closeButtonRef = useRef<HTMLButtonElement>(null)
   useEffect(() => {
@@ -33,7 +36,10 @@ export const Dialog = ({
       onMouseDown={(event) => event.target === event.currentTarget && onClose()}
     >
       <section
-        className="border-border bg-page w-full max-w-lg rounded-2xl border p-6 shadow-2xl"
+        className={cn(
+          'bg-page w-full rounded-2xl border border-[#222c38] p-6 shadow-2xl',
+          size === 'wide' ? 'max-w-2xl' : 'max-w-lg',
+        )}
         role="dialog"
         aria-modal="true"
         aria-labelledby="dialog-title"

@@ -17,8 +17,9 @@ Dokument opisuje docelowy fundament aplikacji. Pierwsza wersja jest lokalną apl
 | Font               | lokalny `@fontsource/nunito-sans`                                           | miękka typografia i działanie offline                           |
 | Serwer HTTP        | Hono                                                                        | mały, typowany routing i middleware                             |
 | Walidacja          | Zod                                                                         | walidacja requestów, konfiguracji i rezultatów agentów          |
-| Dane               | SQLite                                                                      | relacje między projektami, taskami, wykonaniami i sesjami       |
-| ORM/migracje       | Drizzle ORM + drizzle-kit                                                   | typy zbliżone do SQL, proste migracje i brak generatora runtime |
+| Dane MVP           | atomowy plik JSON                                                           | prosty zapis projektów bez zależności natywnych                 |
+| Dane docelowe      | SQLite                                                                      | relacje między projektami, taskami, wykonaniami i sesjami       |
+| ORM/migracje       | Drizzle ORM + drizzle-kit po migracji do SQLite                             | typy zbliżone do SQL, proste migracje i brak generatora runtime |
 | Stan serwera w UI  | TanStack Query                                                              | cache, odświeżanie i stany ładowania                            |
 | Stan lokalny UI    | React state; Zustand dopiero gdy pojawi się command palette i wiele ekranów | nie wprowadzamy globalnego store bez potrzeby                   |
 | Procesy            | `node:child_process` przez `execa`                                          | bez shell injection, kontrola stdout/stderr i anulowania        |

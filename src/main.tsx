@@ -11,8 +11,12 @@ import {
   useLocation,
   useNavigate,
 } from 'react-router-dom'
+import { z } from 'zod'
+import { projectsResponseSchema, type Project } from '../shared/api/projects'
 import { Button } from './components/Button'
 import { Topbar } from './components/Topbar'
+import { requestJson } from './lib/api'
+import { ProjectPage } from './pages/ProjectPage'
 import { ProjectSetupPage } from './pages/ProjectSetupPage'
 import { WelcomePage } from './pages/WelcomePage'
 import './tailwind.css'
@@ -20,6 +24,18 @@ import './tailwind.css'
 const WelcomeRoute = (): React.JSX.Element => {
   const navigate = useNavigate()
   const [shortcutsVisible, setShortcutsVisible] = useState(false)
+  const [projects, setProjects] = useState<Project[]>([])
+  useEffect(() => {
+    let active = true
+    requestJson('/api/projects', projectsResponseSchema)
+      .then(({ projects: loadedProjects }) => {
+        if (active) setProjects(loadedProjects)
+      })
+      .catch(() => undefined)
+    return () => {
+      active = false
+    }
+  }, [])
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       const target = event.target as HTMLElement
@@ -31,17 +47,52 @@ const WelcomeRoute = (): React.JSX.Element => {
         event.preventDefault()
         setShortcutsVisible((visible) => !visible)
       }
-      if (event.key.toLowerCase() === 'n' || event.key === 'Enter') {
+      if (
+        !editing &&
+        projects.length > 0 &&
+        (event.key === 'ArrowDown' || event.key === 'ArrowUp')
+      ) {
+        const projectButtons = Array.from(
+          document.querySelectorAll<HTMLButtonElement>('[data-project-item]'),
+        )
+        if (projectButtons.length === 0) return
+        const currentIndex = projectButtons.indexOf(
+          document.activeElement as HTMLButtonElement,
+        )
+        const nextIndex =
+          event.key === 'ArrowDown'
+            ? Math.min(
+                currentIndex < 0 ? 0 : currentIndex + 1,
+                projectButtons.length - 1,
+              )
+            : Math.max(currentIndex < 0 ? 0 : currentIndex - 1, 0)
+        event.preventDefault()
+        projectButtons[nextIndex]?.focus()
+        return
+      }
+      if (event.key.toLowerCase() === 'n') {
         event.preventDefault()
         navigate('/projects/new')
       }
     }
     document.addEventListener('keydown', onKeyDown)
     return () => document.removeEventListener('keydown', onKeyDown)
-  }, [navigate])
+  }, [navigate, projects.length])
   return (
     <WelcomePage
       onCreate={() => navigate('/projects/new')}
+      onOpen={(id) => navigate(`/projects/${id}`)}
+      onDelete={async (project) => {
+        await requestJson(
+          `/api/projects/${encodeURIComponent(project.id)}`,
+          z.object({ deleted: z.literal(true) }),
+          {
+            method: 'DELETE',
+          },
+        )
+        setProjects((current) => current.filter(({ id }) => id !== project.id))
+      }}
+      projects={projects}
       shortcutsVisible={shortcutsVisible}
     />
   )
@@ -51,8 +102,8 @@ const CreatedRoute = (): React.JSX.Element => {
   const navigate = useNavigate()
   return (
     <main className="bg-welcome text-text min-h-screen px-6 py-6 sm:px-10">
+      <Topbar />
       <div className="mx-auto flex min-h-[calc(100vh-3rem)] w-full max-w-6xl flex-col">
-        <Topbar />
         <div className="grid flex-1 place-items-center p-6">
           <div className="grid max-w-md gap-5 text-center">
             <CheckCircleIcon
@@ -83,7 +134,7 @@ const SetupRoute = (): React.JSX.Element => {
   return (
     <ProjectSetupPage
       onCancel={() => navigate('/')}
-      onComplete={() => navigate('/projects/created')}
+      onComplete={(projectId) => navigate(`/projects/${projectId}`)}
     />
   )
 }
@@ -94,6 +145,7 @@ const App = (): React.JSX.Element => {
     <Routes location={location}>
       <Route path="/" element={<WelcomeRoute />} />
       <Route path="/projects/new/*" element={<SetupRoute />} />
+      <Route path="/projects/:id" element={<ProjectPage />} />
       <Route path="/projects/created" element={<CreatedRoute />} />
       <Route path="*" element={<WelcomeRoute />} />
     </Routes>

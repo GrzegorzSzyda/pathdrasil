@@ -1,6 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
-import { Dialog } from '../components/Dialog'
+import type { TaskSource } from '../../shared/api/integrations'
+import {
+  createProjectRequestSchema,
+  projectSchema,
+} from '../../shared/api/projects'
+import {
+  directoryListingSchema,
+  type DirectoryListing,
+} from '../../shared/api/repositories'
+import { DirectoryPickerDialog } from '../components/DirectoryPickerDialog'
 import { SetupLayout, type SetupStep } from '../components/SetupLayout'
+import { requestJson } from '../lib/api'
 import { AgentStep } from './project-setup/AgentStep'
 import { ProjectStep } from './project-setup/ProjectStep'
 import { RepositoriesStep } from './project-setup/RepositoriesStep'
@@ -18,7 +28,15 @@ const steps: SetupStep[] = [
   { title: 'Podsumowanie' },
 ]
 
-type ProjectSetupPageProps = { onCancel: () => void; onComplete: () => void }
+type ProjectSetupPageProps = {
+  onCancel: () => void
+  onComplete: (projectId: string) => void
+}
+
+type DirectoryTarget = {
+  index: number
+  field: 'path' | 'worktree'
+}
 
 export const ProjectSetupPage = ({
   onCancel,
@@ -29,16 +47,33 @@ export const ProjectSetupPage = ({
   const [projectName, setProjectName] = useState('')
   const [taskProvider, setTaskProvider] = useState('github-issues')
   const [taskAccount, setTaskAccount] = useState('')
+  const [taskSource, setTaskSource] = useState<TaskSource | null>(null)
   const [repoProvider, setRepoProvider] = useState('github')
   const [repositories, setRepositories] = useState<RepositoryDraft[]>([
     { path: '', worktree: '' },
   ])
   const [agent, setAgent] = useState('codex')
-  const [language, setLanguage] = useState('Polski')
-  const [autonomy, setAutonomy] = useState('pytaj-przed-publikacja')
+  const [taskLanguage, setTaskLanguage] = useState('Polski')
+  const [repositoryLanguage, setRepositoryLanguage] = useState('English')
+  const [pathdrasilLanguage, setPathdrasilLanguage] = useState('Polski')
+  const [autonomy, setAutonomy] = useState('publikuj-draft-pr-mr')
+  const [permissions, setPermissions] = useState({
+    pushBranch: true,
+    createPullRequest: true,
+    merge: false,
+    respondToReview: false,
+    updateTask: false,
+    sendMessages: false,
+  })
   const [error, setError] = useState('')
   const [shortcutsVisible, setShortcutsVisible] = useState(false)
-  const [directoryIndex, setDirectoryIndex] = useState<number | null>(null)
+  const [directoryTarget, setDirectoryTarget] =
+    useState<DirectoryTarget | null>(null)
+  const [directoryListing, setDirectoryListing] =
+    useState<DirectoryListing | null>(null)
+  const [directoryError, setDirectoryError] = useState('')
+  const [directoryLoading, setDirectoryLoading] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
   const headingRef = useRef<HTMLHeadingElement>(null)
 
   useEffect(() => {
@@ -51,7 +86,7 @@ export const ProjectSetupPage = ({
 
   const canContinue = (step: number): boolean => {
     if (step === 0) return projectName.trim().length > 0
-    if (step === 1) return Boolean(taskProvider && taskAccount)
+    if (step === 1) return Boolean(taskProvider && taskAccount && taskSource)
     if (step === 2)
       return (
         repositories.length > 0 &&
@@ -76,9 +111,53 @@ export const ProjectSetupPage = ({
     return true
   }
 
+  const createProject = async () => {
+    setSubmitting(true)
+    setError('')
+    try {
+      const input = createProjectRequestSchema.parse({
+        name: projectName,
+        taskManager: {
+          providerId: taskProvider,
+          accountId: taskAccount,
+          sources: taskSource ? [taskSource] : [],
+        },
+        repositories: repositories.map((repository) => ({
+          ...repository,
+          provider: repoProvider,
+        })),
+        agent: { id: agent },
+        rules: {
+          taskLanguage,
+          repositoryLanguage,
+          pathdrasilLanguage,
+          autonomy,
+          permissions,
+        },
+      })
+      const project = await requestJson('/api/projects', projectSchema, {
+        method: 'POST',
+        body: JSON.stringify(input),
+      })
+      onComplete(project.id)
+    } catch (caught) {
+      setError(
+        caught instanceof Error
+          ? caught.message
+          : 'Nie udało się utworzyć projektu.',
+      )
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
   const advance = () => {
+    if (submitting) return
     if (!validate()) return
-    if (activeStep === steps.length - 1) return onComplete()
+    if (activeStep === steps.length - 1) {
+      void createProject()
+      return
+    }
     setMaxUnlockedStep((step) => Math.max(step, activeStep + 1))
     setActiveStep((step) => step + 1)
   }
@@ -93,7 +172,13 @@ export const ProjectSetupPage = ({
         event.preventDefault()
         setShortcutsVisible((visible) => !visible)
       }
-      if (directoryIndex !== null) return
+      if (directoryTarget !== null) return
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        onCancel()
+        setError('')
+        return
+      }
       if (/^[1-6]$/.test(event.key) && !editing) {
         const requestedStep = Number(event.key) - 1
         if (requestedStep <= maxUnlockedStep) {
@@ -108,7 +193,7 @@ export const ProjectSetupPage = ({
         advance()
         return
       }
-      if ((event.key === 'Escape' || event.key === 'Backspace') && !editing) {
+      if (event.key === 'Backspace' && !editing) {
         event.preventDefault()
         if (activeStep === 0) onCancel()
         else setActiveStep((step) => step - 1)
@@ -141,6 +226,27 @@ export const ProjectSetupPage = ({
     setError('')
   }
 
+  const openDirectory = async (target: DirectoryTarget, path?: string) => {
+    setDirectoryTarget(target)
+    setDirectoryError('')
+    setDirectoryLoading(true)
+    if (!path) setDirectoryListing(null)
+    try {
+      const query = path ? `?path=${encodeURIComponent(path)}` : ''
+      setDirectoryListing(
+        await requestJson(`/api/directories${query}`, directoryListingSchema),
+      )
+    } catch (caught) {
+      setDirectoryError(
+        caught instanceof Error
+          ? caught.message
+          : 'Nie udało się odczytać katalogu.',
+      )
+    } finally {
+      setDirectoryLoading(false)
+    }
+  }
+
   return (
     <>
       <SetupLayout
@@ -155,8 +261,14 @@ export const ProjectSetupPage = ({
           activeStep > 0 ? setActiveStep((step) => step - 1) : onCancel()
         }
         onNext={advance}
-        canNext={canContinue(activeStep)}
-        nextLabel={activeStep === steps.length - 1 ? 'Utwórz projekt' : 'Dalej'}
+        canNext={canContinue(activeStep) && !submitting}
+        nextLabel={
+          activeStep === steps.length - 1
+            ? submitting
+              ? 'Tworzenie…'
+              : 'Utwórz projekt'
+            : 'Dalej'
+        }
         shortcutsVisible={shortcutsVisible}
       >
         <h2
@@ -183,6 +295,8 @@ export const ProjectSetupPage = ({
             onChange={setTaskProvider}
             account={taskAccount}
             onAccountChange={setTaskAccount}
+            source={taskSource}
+            onSourceChange={setTaskSource}
             shortcutsVisible={shortcutsVisible}
           />
         )}
@@ -200,7 +314,7 @@ export const ProjectSetupPage = ({
                 items.filter((_, itemIndex) => itemIndex !== index),
               )
             }
-            onBrowse={setDirectoryIndex}
+            onBrowse={(index, field) => void openDirectory({ index, field })}
             hasError={Boolean(error)}
             shortcutsVisible={shortcutsVisible}
           />
@@ -214,23 +328,47 @@ export const ProjectSetupPage = ({
         )}
         {activeStep === 4 && (
           <RulesStep
-            language={language}
+            taskLanguage={taskLanguage}
+            repositoryLanguage={repositoryLanguage}
+            pathdrasilLanguage={pathdrasilLanguage}
             autonomy={autonomy}
-            onLanguageChange={setLanguage}
+            permissions={permissions}
+            onTaskLanguageChange={setTaskLanguage}
+            onRepositoryLanguageChange={setRepositoryLanguage}
+            onPathdrasilLanguageChange={setPathdrasilLanguage}
             onAutonomyChange={setAutonomy}
+            onPermissionChange={(permission, enabled) =>
+              setPermissions((current) => {
+                const next = { ...current, [permission]: enabled }
+                if (permission === 'pushBranch' && !enabled)
+                  next.createPullRequest = false
+                if (permission === 'createPullRequest' && enabled)
+                  next.pushBranch = true
+                return next
+              })
+            }
             shortcutsVisible={shortcutsVisible}
           />
         )}
         {activeStep === 5 && (
           <SummaryStep
             projectName={projectName}
+            taskManager={
+              taskProvider === 'gitlab-issues'
+                ? 'GitLab Issues'
+                : 'GitHub Issues'
+            }
+            taskSource={taskSource?.fullName ?? '—'}
             repositoriesCount={repositories.length}
-            language={language}
+            taskLanguage={taskLanguage}
+            repositoryLanguage={repositoryLanguage}
+            pathdrasilLanguage={pathdrasilLanguage}
             autonomy={
-              autonomy === 'pytaj-przed-publikacja'
-                ? 'pytaj przed publikacją'
+              autonomy === 'publikuj-draft-pr-mr'
+                ? 'pracuj i wystaw draft PR/MR'
                 : autonomy
             }
+            publishPullRequest={permissions.createPullRequest}
           />
         )}
         {error && (
@@ -239,34 +377,22 @@ export const ProjectSetupPage = ({
           </p>
         )}
       </SetupLayout>
-      <Dialog
-        open={directoryIndex !== null}
-        onClose={() => setDirectoryIndex(null)}
-        title="Wybierz folder"
-      >
-        <p className="text-muted mb-4 text-sm">
-          W wersji backendowej lista będzie pochodziła z lokalnego systemu
-          plików.
-        </p>
-        <div className="grid gap-2">
-          {['/home', '/home/grzegorzszyda/Projekty', '/mnt/c/Users'].map(
-            (path) => (
-              <button
-                key={path}
-                type="button"
-                className="border-border bg-page-deep text-heading hover:bg-surface rounded-xl border px-4 py-3 text-left text-sm"
-                onClick={() => {
-                  if (directoryIndex !== null)
-                    updateRepository(directoryIndex, 'path', path)
-                  setDirectoryIndex(null)
-                }}
-              >
-                {path}
-              </button>
-            ),
-          )}
-        </div>
-      </Dialog>
+      <DirectoryPickerDialog
+        open={directoryTarget !== null}
+        mode={directoryTarget?.field === 'worktree' ? 'worktree' : 'repository'}
+        listing={directoryListing}
+        loading={directoryLoading}
+        error={directoryError}
+        onClose={() => setDirectoryTarget(null)}
+        onNavigate={(path) => {
+          if (directoryTarget) void openDirectory(directoryTarget, path)
+        }}
+        onSelect={(path) => {
+          if (directoryTarget)
+            updateRepository(directoryTarget.index, directoryTarget.field, path)
+          setDirectoryTarget(null)
+        }}
+      />
     </>
   )
 }

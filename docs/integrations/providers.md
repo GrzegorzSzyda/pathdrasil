@@ -2,15 +2,15 @@
 
 ## Macierz MVP
 
-| Domena       | Provider      | Stan                 | Sposób połączenia                          |
-| ------------ | ------------- | -------------------- | ------------------------------------------ |
-| Task manager | GitHub Issues | dostępny             | lokalnie autoryzowane `gh`                 |
-| Task manager | GitLab Issues | dostępny             | lokalnie autoryzowane `glab`               |
-| Task manager | Linear        | wkrótce              | kontrolka nieaktywna                       |
-| Repozytoria  | GitHub        | dostępny             | lokalnie autoryzowane `gh` i lokalny `git` |
-| Repozytoria  | GitLab        | wkrótce              | kontrolka nieaktywna                       |
-| Agent        | Codex         | dostępny po wykryciu | lokalnie autoryzowane `codex`              |
-| Agent        | Claude        | wkrótce              | kontrolka nieaktywna                       |
+| Domena       | Provider      | Stan                 | Sposób połączenia                            |
+| ------------ | ------------- | -------------------- | -------------------------------------------- |
+| Task manager | GitHub Issues | dostępny             | lokalnie autoryzowane `gh`                   |
+| Task manager | GitLab Issues | dostępny             | lokalnie autoryzowane `glab`                 |
+| Task manager | Linear        | wkrótce              | kontrolka nieaktywna                         |
+| Repozytoria  | GitHub        | dostępny             | lokalnie autoryzowane `gh` i lokalny `git`   |
+| Repozytoria  | GitLab        | dostępny             | lokalnie autoryzowane `glab` i lokalny `git` |
+| Agent        | Codex         | dostępny po wykryciu | lokalnie autoryzowane `codex`                |
+| Agent        | Claude        | wkrótce              | kontrolka nieaktywna                         |
 
 ## Zasady
 

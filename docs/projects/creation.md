@@ -7,13 +7,15 @@ Użytkownik może rozpocząć tworzenie projektu z pustego widoku głównego bez
 ## Przepływ MVP
 
 1. **Projekt** — nazwa i podstawowe ustawienia wewnętrzne Pathdrasil.
-2. **Menedżer zadań** — wybór providera oraz konkretnego wykrytego konta CLI; GitHub Issues jest dostępny, pozostałe warianty pokazują stan niedostępności.
-3. **Repozytoria** — GitHub i co najmniej jedno lokalne repozytorium; akcja „Dodaj kolejne repozytorium” pozostaje na tej samej stronie domeny.
+2. **Menedżer zadań** — wybór providera, aktywnego wykrytego konta CLI oraz projektu lub repozytorium będącego źródłem tasków; GitHub Issues i GitLab Issues są dostępne po poprawnej autoryzacji odpowiedniego CLI.
+3. **Repozytoria** — GitHub lub GitLab i co najmniej jedno lokalne repozytorium; akcja „Dodaj kolejne repozytorium” pozostaje na tej samej stronie domeny.
 4. **Agent** — wykrycie i wybór Codex CLI; pozostali providerzy mogą być pokazani jako „Wkrótce”.
-5. **Reguły projektu** — języki i początkowa polityka autonomii Pathdrasil.
+5. **Reguły projektu** — osobny język task managera, repozytorium i pracy w Pathdrasilu, polityka autonomii oraz uprawnienia publikacji.
 6. **Podsumowanie** — przegląd konfiguracji i utworzenie projektu.
 
 Strony „Projekt”, „Reguły projektu” i „Podsumowanie” dotyczą konfiguracji wewnętrznej. Każda strona integracyjna odpowiada dokładnie jednej domenie i nie miesza ustawień innych providerów.
+
+Źródło tasków jest wybierane niezależnie od repozytoriów kodu. W pierwszym pionie projekt używa jednego źródła, ale kontrakt przechowuje tablicę, aby można było później dodać kolejne bez zmiany modelu.
 
 ## Stan kreatora
 
@@ -32,6 +34,9 @@ W MVP używamy przeglądarki katalogów dostarczanej przez lokalny backend:
 - backend zwraca katalog domowy użytkownika i katalog roboczy jako bezpieczne punkty startowe,
 - backend normalizuje ścieżkę, sprawdza jej istnienie i uprawnienia oraz weryfikuje repozytorium przez `git` i `gh`,
 - frontend otrzymuje jedynie informacje potrzebne do nawigacji i walidacji; nie odczytuje zawartości plików.
+
+Ten sam wybierak obsługuje folder repozytorium i katalog nadrzędny worktree.
+Nagłówek i opis dialogu zawsze wyjaśniają, jaki rodzaj katalogu jest wybierany.
 
 Nie używamy przeglądarkowego `File System Access API`. Aplikacja potrzebuje rzeczywistej ścieżki widocznej dla procesu backendu w WSL.
 

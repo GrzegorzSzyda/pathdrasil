@@ -1,6 +1,7 @@
 import {
   CheckCircleIcon,
   CodeIcon,
+  FolderSimpleIcon,
   GithubLogoIcon,
   RobotIcon,
   SlidersHorizontalIcon,
@@ -25,15 +26,25 @@ const Row = ({
 )
 type Props = {
   projectName: string
+  taskManager: string
+  taskSource: string
   repositoriesCount: number
-  language: string
+  taskLanguage: string
+  repositoryLanguage: string
+  pathdrasilLanguage: string
   autonomy: string
+  publishPullRequest: boolean
 }
 export const SummaryStep = ({
   projectName,
+  taskManager,
+  taskSource,
   repositoriesCount,
-  language,
+  taskLanguage,
+  repositoryLanguage,
+  pathdrasilLanguage,
   autonomy,
+  publishPullRequest,
 }: Props): React.JSX.Element => (
   <div className="border-border divide-border bg-page-deep divide-y rounded-2xl border">
     <Row
@@ -41,10 +52,11 @@ export const SummaryStep = ({
       value={projectName || '—'}
       icon={<SlidersHorizontalIcon />}
     />
+    <Row label="Menedżer zadań" value={taskManager} icon={<GithubLogoIcon />} />
     <Row
-      label="Menedżer zadań"
-      value="GitHub Issues"
-      icon={<GithubLogoIcon />}
+      label="Projekt z taskami"
+      value={taskSource}
+      icon={<FolderSimpleIcon />}
     />
     <Row
       label="Repozytoria"
@@ -52,9 +64,21 @@ export const SummaryStep = ({
       icon={<CodeIcon />}
     />
     <Row label="Agent" value="Codex CLI" icon={<RobotIcon />} />
+    <Row label="Język tasków" value={taskLanguage} icon={<CheckCircleIcon />} />
     <Row
-      label="Język / autonomia"
-      value={`${language} · ${autonomy}`}
+      label="Język repozytorium"
+      value={repositoryLanguage}
+      icon={<CheckCircleIcon />}
+    />
+    <Row
+      label="Język pracy"
+      value={pathdrasilLanguage}
+      icon={<CheckCircleIcon />}
+    />
+    <Row label="Autonomia" value={autonomy} icon={<CheckCircleIcon />} />
+    <Row
+      label="Publikacja"
+      value={publishPullRequest ? 'draft PR/MR' : 'ręczna'}
       icon={<CheckCircleIcon />}
     />
   </div>

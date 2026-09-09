@@ -24,9 +24,7 @@ const providers: ProviderOption[] = [
   {
     id: 'gitlab',
     name: 'GitLab',
-    description: 'Provider nie jest jeszcze obsługiwany',
-    badge: 'Wkrótce',
-    available: false,
+    description: 'Repozytoria i issues przez glab',
     icon: <CodeIcon size={24} />,
   },
 ]
@@ -38,7 +36,7 @@ type Props = StepCommonProps & {
   onUpdate: (index: number, key: keyof RepositoryDraft, value: string) => void
   onAdd: () => void
   onRemove: (index: number) => void
-  onBrowse: (index: number) => void
+  onBrowse: (index: number, field: keyof RepositoryDraft) => void
   hasError: boolean
 }
 
@@ -96,8 +94,8 @@ export const RepositoriesStep = ({
             />
             <Button
               type="button"
-              appearance="outline"
-              onClick={() => onBrowse(index)}
+              appearance="ghost"
+              onClick={() => onBrowse(index, 'path')}
             >
               <FolderOpenIcon aria-hidden="true" /> Przeglądaj
             </Button>
@@ -109,18 +107,27 @@ export const RepositoriesStep = ({
           hint="Katalog roboczy dla agenta"
           required
         >
-          <Input
-            id={`worktree-path-${index}`}
-            value={repo.worktree}
-            onChange={(event) =>
-              onUpdate(index, 'worktree', event.target.value)
-            }
-            placeholder="/home/użytkownik/worktrees"
-          />
+          <div className="flex gap-2">
+            <Input
+              id={`worktree-path-${index}`}
+              value={repo.worktree}
+              onChange={(event) =>
+                onUpdate(index, 'worktree', event.target.value)
+              }
+              placeholder="/home/użytkownik/worktrees/projekt"
+            />
+            <Button
+              type="button"
+              appearance="ghost"
+              onClick={() => onBrowse(index, 'worktree')}
+            >
+              <FolderOpenIcon aria-hidden="true" /> Przeglądaj
+            </Button>
+          </div>
         </FormField>
       </div>
     ))}
-    <Button type="button" appearance="outline" onClick={onAdd}>
+    <Button type="button" appearance="ghost" onClick={onAdd}>
       + Dodaj kolejne repozytorium
     </Button>
     <InlineAlert tone="info">

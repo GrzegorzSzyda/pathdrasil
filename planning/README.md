@@ -1,6 +1,7 @@
 # Materiały projektowe
 
 - [MVP 1](MVP-1.md) — pierwszy działający zakres: projekt, folder i GitHub Issues.
+- [Backend](BACKEND.md) — fundament serwera, kontrakty API oraz etapy integracji z `gh` i `glab`.
 - [NOTES](NOTES.md) — pełne dotychczasowe ustalenia produktowe.
 - [`../docs/`](../docs/) — aktualna dokumentacja podzielona według domen.
 - [`../CONTEXT.md`](../CONTEXT.md) — słownik obowiązującego nazewnictwa.

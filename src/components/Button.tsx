@@ -3,7 +3,7 @@ import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '../lib/cn'
 
 const buttonVariants = cva(
-  'focus-visible:outline-focus inline-flex cursor-pointer items-center justify-center gap-3 rounded-xl text-base font-bold transition-[background-color,color,filter,box-shadow] duration-200 ease-out hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-3 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
+  'inline-flex cursor-pointer items-center justify-center gap-3 rounded-xl text-base font-bold transition-[background-color,color,filter,box-shadow] duration-200 ease-out hover:brightness-110 focus-visible:outline-none disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
   {
     variants: {
       tone: {
@@ -13,7 +13,6 @@ const buttonVariants = cva(
       appearance: {
         solid: '',
         ghost: '',
-        outline: '',
       },
       size: {
         default: 'min-h-12 px-5',
@@ -25,29 +24,24 @@ const buttonVariants = cva(
         tone: 'brand',
         appearance: 'solid',
         class:
-          'bg-brand text-brand-ink shadow-lg shadow-page/20 hover:bg-brand-hover',
+          'bg-brand text-brand-ink shadow-lg shadow-page/20 hover:bg-brand-hover focus-visible:bg-brand-hover',
       },
       {
         tone: 'danger',
         appearance: 'solid',
         class:
-          'bg-danger text-white shadow-lg shadow-page/20 hover:bg-danger-hover',
+          'bg-danger text-white shadow-lg shadow-page/20 hover:bg-danger-hover focus-visible:bg-danger-hover',
       },
       {
         tone: 'brand',
         appearance: 'ghost',
-        class: 'text-muted hover:bg-surface hover:text-heading',
-      },
-      {
-        tone: 'brand',
-        appearance: 'outline',
         class:
-          'border border-border bg-surface/50 text-heading hover:bg-surface',
+          'text-muted hover:bg-surface hover:text-heading focus-visible:bg-surface focus-visible:text-heading',
       },
       {
         tone: 'danger',
         appearance: 'ghost',
-        class: 'text-danger hover:bg-danger/15',
+        class: 'text-danger hover:bg-danger/15 focus-visible:bg-danger/15',
       },
     ],
     defaultVariants: { tone: 'brand', appearance: 'solid', size: 'default' },

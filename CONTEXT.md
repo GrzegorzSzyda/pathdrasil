@@ -23,6 +23,7 @@ Hierarchia: `Task → Wykonanie → Praca repozytorium → Sesja agenta`.
 - **domena integracji (`Integration Domain`)** — jeden rodzaj odpowiedzialności, np. task manager, repozytoria lub agent AI. Jedna strona konfiguracji obsługuje tylko jedną domenę.
 - **provider** — konkretne narzędzie wybrane w domenie, np. GitHub Issues w domenie task managera.
 - **task manager** — zewnętrzne źródło tasków i ich statusów.
+- **źródło tasków (`Task Source`)** — konkretny projekt lub repozytorium providera, z którego projekt Pathdrasil synchronizuje taski; jest niezależne od repozytoriów kodu objętych wykonaniem.
 - **provider repozytoriów** — narzędzie dostarczające metadane repozytoriów, pull requestów i checks.
 - **agent** — lokalnie dostępne CLI wykonujące pracę, np. Codex CLI.
 - **połączenie (`Connection`)** — sprawdzona możliwość użycia providera. W MVP wynika z lokalnej instalacji i autoryzacji CLI.
