@@ -19,11 +19,31 @@ export const Dialog = ({
   size = 'default',
 }: DialogProps): React.JSX.Element | null => {
   const closeButtonRef = useRef<HTMLButtonElement>(null)
+  const dialogRef = useRef<HTMLElement>(null)
   useEffect(() => {
     if (!open) return
     closeButtonRef.current?.focus()
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose()
+      if (event.key === 'Escape') {
+        onClose()
+        return
+      }
+      if (event.key !== 'Tab' || !dialogRef.current) return
+      const focusable = Array.from(
+        dialogRef.current.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ),
+      )
+      if (focusable.length === 0) return
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault()
+        last.focus()
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault()
+        first.focus()
+      }
     }
     document.addEventListener('keydown', onKeyDown)
     return () => document.removeEventListener('keydown', onKeyDown)
@@ -36,6 +56,7 @@ export const Dialog = ({
       onMouseDown={(event) => event.target === event.currentTarget && onClose()}
     >
       <section
+        ref={dialogRef}
         className={cn(
           'bg-page w-full rounded-2xl border border-[#222c38] p-6 shadow-2xl',
           size === 'wide' ? 'max-w-2xl' : 'max-w-lg',
@@ -44,7 +65,7 @@ export const Dialog = ({
         aria-modal="true"
         aria-labelledby="dialog-title"
       >
-        <div className="mb-5 flex items-start justify-between gap-4">
+        <div className="mb-5 flex items-center justify-between gap-4">
           <h2 className="text-heading text-xl font-semibold" id="dialog-title">
             {title}
           </h2>

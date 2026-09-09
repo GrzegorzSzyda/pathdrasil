@@ -1,5 +1,4 @@
 import { RobotIcon } from '@phosphor-icons/react'
-import { InlineAlert } from '../../components/InlineAlert'
 import {
   ProviderPicker,
   type ProviderOption,
@@ -35,8 +34,5 @@ export const AgentStep = ({ value, onChange }: Props): React.JSX.Element => (
       value={value}
       onChange={onChange}
     />
-    <InlineAlert>
-      Backend sprawdzi dostępność `codex` przed uruchomieniem pracy.
-    </InlineAlert>
   </div>
 )

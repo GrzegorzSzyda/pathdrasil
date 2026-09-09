@@ -2,6 +2,7 @@ import type { KeyboardEvent, ReactNode } from 'react'
 import { useRef } from 'react'
 import { CheckIcon, LockKeyIcon } from '@phosphor-icons/react'
 import { cn } from '../lib/cn'
+import { LoadingIndicator } from './LoadingIndicator'
 
 export type ProviderOption = {
   id: string
@@ -16,6 +17,7 @@ type ProviderPickerProps = {
   value: string
   onChange: (id: string) => void
   label: string
+  loading?: boolean
 }
 
 export const ProviderPicker = ({
@@ -23,6 +25,7 @@ export const ProviderPicker = ({
   value,
   onChange,
   label,
+  loading = false,
 }: ProviderPickerProps): React.JSX.Element => {
   const buttonRefs = useRef<Array<HTMLButtonElement | null>>([])
   const focusAvailable = (startIndex: number, direction: 1 | -1): void => {
@@ -40,6 +43,7 @@ export const ProviderPicker = ({
     index: number,
   ): void => {
     if (event.key === 'Enter' || event.key === ' ') {
+      if (event.key === 'Enter' && value === options[index].id) return
       event.preventDefault()
       event.stopPropagation()
       onChange(options[index].id)
@@ -67,6 +71,9 @@ export const ProviderPicker = ({
       {options.map((option, index) => {
         const available = option.available !== false
         const selected = value === option.id
+        const firstAvailableIndex = options.findIndex(
+          (item) => item.available !== false,
+        )
         return (
           <button
             key={option.id}
@@ -76,12 +83,13 @@ export const ProviderPicker = ({
             type="button"
             disabled={!available}
             aria-pressed={selected}
-            tabIndex={selected ? 0 : -1}
+            tabIndex={
+              selected || (!value && index === firstAvailableIndex) ? 0 : -1
+            }
             onClick={() => onChange(option.id)}
             onKeyDown={(event) => handleKeyDown(event, index)}
             className={cn(
-              'text-muted focus-visible:bg-surface/70 focus-visible:ring-focus relative flex min-h-20 items-center gap-4 rounded-xl border border-transparent bg-transparent px-4 text-left transition focus-visible:ring-2 focus-visible:outline-none',
-              available && 'hover:bg-surface/70 hover:text-heading',
+              'text-muted hover:bg-surface/70 hover:text-heading focus:bg-surface/70 focus:text-heading relative flex min-h-20 items-center gap-4 rounded-xl border border-transparent bg-transparent px-4 text-left transition focus:outline-none',
               selected && 'bg-brand/10 text-heading',
               !available && 'cursor-not-allowed opacity-60',
             )}
@@ -110,13 +118,15 @@ export const ProviderPicker = ({
                 aria-hidden="true"
               />
             )}
-            {!available && (
+            {loading ? (
+              <LoadingIndicator label="Sprawdzanie narzędzia…" />
+            ) : !available ? (
               <LockKeyIcon
                 className="text-muted shrink-0"
                 size={18}
                 aria-hidden="true"
               />
-            )}
+            ) : null}
           </button>
         )
       })}

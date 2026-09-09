@@ -7,6 +7,7 @@ type FormFieldProps = {
   hint?: string
   error?: string
   required?: boolean
+  hideLabel?: boolean
   children: ReactNode
 }
 
@@ -16,11 +17,17 @@ export const FormField = ({
   hint,
   error,
   required,
+  hideLabel = false,
   children,
 }: FormFieldProps): React.JSX.Element => {
   return (
     <div className="grid gap-2">
-      <label className="text-heading text-sm font-semibold" htmlFor={id}>
+      <label
+        className={
+          hideLabel ? 'sr-only' : 'text-heading text-base font-semibold'
+        }
+        htmlFor={id}
+      >
         {label} {required && <span className="text-brand">*</span>}
       </label>
       {children}

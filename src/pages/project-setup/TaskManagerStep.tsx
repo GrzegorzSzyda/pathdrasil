@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   CodeIcon,
   GithubLogoIcon,
@@ -82,13 +82,6 @@ export const TaskManagerStep = ({
   const [sources, setSources] = useState<TaskSource[]>([])
   const [sourcesLoading, setSourcesLoading] = useState(true)
   const [sourcesError, setSourcesError] = useState('')
-  const initialProvider = useRef(value)
-  const selectedSource = useRef(source)
-
-  useEffect(() => {
-    selectedSource.current = source
-  }, [source])
-
   useEffect(() => {
     let active = true
     requestJson('/api/integrations', integrationsResponseSchema)
@@ -96,21 +89,6 @@ export const TaskManagerStep = ({
         if (!active) return
         setDetectedProviders(providers)
         setLoadError('')
-        const selected = providers.find(
-          (provider) => provider.id === initialProvider.current,
-        )
-        const fallback = providers.find(
-          (provider) => provider.status === 'available',
-        )
-        const nextProvider =
-          selected?.status === 'available' ? selected : fallback
-        if (nextProvider && nextProvider.id !== initialProvider.current)
-          onChange(nextProvider.id)
-        const nextAccount = nextProvider?.accounts[0]
-        if (nextAccount) {
-          setSourcesLoading(true)
-          onAccountChange(nextAccount.id)
-        } else onAccountChange('')
       })
       .catch((error: unknown) => {
         if (active)
@@ -129,6 +107,40 @@ export const TaskManagerStep = ({
   }, [onAccountChange, onChange])
 
   useEffect(() => {
+    if (loading) return
+    const frame = requestAnimationFrame(() => {
+      document
+        .querySelector<HTMLElement>(
+          '#setup-content button:not([disabled]), #setup-content input:not([disabled]), #setup-content select:not([disabled])',
+        )
+        ?.focus()
+    })
+    return () => cancelAnimationFrame(frame)
+  }, [loading])
+
+  useEffect(() => {
+    if (loading || !value || account) return
+    requestAnimationFrame(() => {
+      document
+        .querySelector<HTMLElement>(
+          '#task-account-section button:not([disabled])',
+        )
+        ?.focus()
+    })
+  }, [account, loading, value])
+
+  useEffect(() => {
+    if (sourcesLoading || !account) return
+    requestAnimationFrame(() => {
+      document
+        .querySelector<HTMLElement>(
+          '#task-source-section button:not([disabled])',
+        )
+        ?.focus()
+    })
+  }, [account, sourcesLoading])
+
+  useEffect(() => {
     if (!account || !['github-issues', 'gitlab-issues'].includes(value)) return
     let active = true
     requestJson(
@@ -138,10 +150,6 @@ export const TaskManagerStep = ({
       .then(({ sources: loadedSources }) => {
         if (!active) return
         setSources(loadedSources)
-        const current = loadedSources.find(
-          (item) => item.id === selectedSource.current?.id,
-        )
-        onSourceChange(current ?? loadedSources[0] ?? null)
       })
       .catch((error: unknown) => {
         if (!active) return
@@ -175,7 +183,10 @@ export const TaskManagerStep = ({
             : loading
               ? 'Sprawdzanie lokalnej integracji…'
               : 'Brak informacji o integracji.'),
-        badge: detected ? statusBadge[detected.status] : undefined,
+        badge:
+          detected && detected.status !== 'available'
+            ? statusBadge[detected.status]
+            : undefined,
         available: detected?.status === 'available',
       }
     },
@@ -194,13 +205,7 @@ export const TaskManagerStep = ({
     onSourceChange(null)
     setSourcesLoading(true)
     setSourcesError('')
-    const nextAccounts =
-      detectedProviders.find((item) => item.id === provider)?.accounts ?? []
-    onAccountChange(
-      nextAccounts.some((option) => option.id === account)
-        ? account
-        : (nextAccounts[0]?.id ?? ''),
-    )
+    onAccountChange('')
   }
   const handleAccountChange = (nextAccount: string) => {
     onAccountChange(nextAccount)
@@ -215,40 +220,51 @@ export const TaskManagerStep = ({
           id="task-manager-heading"
           className="text-heading text-lg font-semibold"
         >
-          Menedżer zadań
+          Narzędzie
         </h3>
         <ProviderPicker
-          label="Menedżer zadań"
+          label="Narzędzie"
           options={providerOptions}
           value={value}
           onChange={handleProviderChange}
+          loading={loading}
         />
       </section>
       {loadError && <InlineAlert tone="danger">{loadError}</InlineAlert>}
-      <section className="grid gap-5" aria-labelledby="task-account-heading">
-        <h3
-          id="task-account-heading"
-          className="text-heading text-lg font-semibold"
+      {value && (
+        <section
+          id="task-account-section"
+          className="grid gap-5"
+          aria-labelledby="task-account-heading"
         >
-          Konto narzędzia
-        </h3>
-        <AccountPicker
-          label="Konto narzędzia"
-          options={accountOptions}
-          value={account}
-          onChange={handleAccountChange}
-        />
-      </section>
+          <h3
+            id="task-account-heading"
+            className="text-heading text-lg font-semibold"
+          >
+            Konto
+          </h3>
+          <AccountPicker
+            label="Konto"
+            options={accountOptions}
+            value={account}
+            onChange={handleAccountChange}
+          />
+        </section>
+      )}
       {account && (
-        <section className="grid gap-5" aria-labelledby="task-source-heading">
+        <section
+          id="task-source-section"
+          className="grid gap-5"
+          aria-labelledby="task-source-heading"
+        >
           <h3
             id="task-source-heading"
             className="text-heading text-lg font-semibold"
           >
-            Projekt z taskami
+            Projekt
           </h3>
           {sourcesLoading ? (
-            <p className="text-muted px-4 py-3 text-sm">
+            <p className="text-muted px-4 py-3 text-sm" role="status">
               Pobieranie projektów…
             </p>
           ) : (

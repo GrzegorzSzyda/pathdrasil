@@ -45,10 +45,10 @@ export const ProjectSetupPage = ({
   const [activeStep, setActiveStep] = useState(0)
   const [maxUnlockedStep, setMaxUnlockedStep] = useState(0)
   const [projectName, setProjectName] = useState('')
-  const [taskProvider, setTaskProvider] = useState('github-issues')
+  const [taskProvider, setTaskProvider] = useState('')
   const [taskAccount, setTaskAccount] = useState('')
   const [taskSource, setTaskSource] = useState<TaskSource | null>(null)
-  const [repoProvider, setRepoProvider] = useState('github')
+  const [repoProvider, setRepoProvider] = useState('')
   const [repositories, setRepositories] = useState<RepositoryDraft[]>([
     { path: '', worktree: '' },
   ])
@@ -89,6 +89,7 @@ export const ProjectSetupPage = ({
     if (step === 1) return Boolean(taskProvider && taskAccount && taskSource)
     if (step === 2)
       return (
+        Boolean(repoProvider) &&
         repositories.length > 0 &&
         repositories.every((repo) => repo.path.trim() && repo.worktree.trim())
       )
@@ -99,6 +100,8 @@ export const ProjectSetupPage = ({
   const validate = (): boolean => {
     if (activeStep === 0 && !projectName.trim())
       return (setError('Podaj nazwę projektu.'), false)
+    if (activeStep === 2 && !repoProvider)
+      return (setError('Wybierz provider repozytoriów.'), false)
     if (
       activeStep === 2 &&
       repositories.some((repo) => !repo.path.trim() || !repo.worktree.trim())
@@ -274,7 +277,7 @@ export const ProjectSetupPage = ({
         <h2
           ref={headingRef}
           tabIndex={-1}
-          className="text-heading text-4xl font-semibold tracking-tight outline-none sm:text-5xl"
+          className="text-heading mb-8 text-4xl font-semibold tracking-tight outline-none sm:text-5xl"
         >
           {steps[activeStep].title}
         </h2>

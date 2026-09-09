@@ -25,6 +25,7 @@ export const TaskSourcePicker = ({
     index: number,
   ): void => {
     if (event.key === 'Enter' || event.key === ' ') {
+      if (event.key === 'Enter' && value === options[index].id) return
       event.preventDefault()
       event.stopPropagation()
       onChange(options[index])
@@ -67,7 +68,7 @@ export const TaskSourcePicker = ({
             onClick={() => onChange(option)}
             onKeyDown={(event) => handleKeyDown(event, index)}
             className={cn(
-              'text-muted hover:bg-surface/70 hover:text-heading focus-visible:bg-surface/70 focus-visible:ring-focus flex min-h-18 items-center gap-4 rounded-xl border border-transparent px-4 text-left transition focus-visible:ring-2 focus-visible:outline-none',
+              'text-muted hover:bg-surface/70 hover:text-heading focus:bg-surface/70 focus:text-heading flex min-h-18 items-center gap-4 rounded-xl border border-transparent px-4 text-left transition focus:outline-none',
               selected && 'bg-brand/10 text-heading',
             )}
           >

@@ -16,7 +16,7 @@ const Row = ({
   value: string
   icon: React.ReactNode
 }): React.JSX.Element => (
-  <div className="flex items-center justify-between gap-4 px-5 py-4">
+  <div className="hover:bg-surface/70 flex items-center justify-between gap-4 rounded-xl px-5 py-4 transition-colors">
     <span className="text-muted flex items-center gap-3 text-sm">
       <span className="text-brand">{icon}</span>
       {label}
@@ -46,7 +46,7 @@ export const SummaryStep = ({
   autonomy,
   publishPullRequest,
 }: Props): React.JSX.Element => (
-  <div className="border-border divide-border bg-page-deep divide-y rounded-2xl border">
+  <div className="grid gap-1">
     <Row
       label="Projekt"
       value={projectName || '—'}

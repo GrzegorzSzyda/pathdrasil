@@ -27,6 +27,7 @@ export const AccountPicker = ({
     index: number,
   ): void => {
     if (event.key === 'Enter' || event.key === ' ') {
+      if (event.key === 'Enter' && value === options[index].id) return
       event.preventDefault()
       event.stopPropagation()
       onChange(options[index].id)
@@ -59,11 +60,11 @@ export const AccountPicker = ({
               }}
               type="button"
               aria-pressed={selected}
-              tabIndex={selected ? 0 : -1}
+              tabIndex={selected || (!value && index === 0) ? 0 : -1}
               onClick={() => onChange(option.id)}
               onKeyDown={(event) => onKeyDown(event, index)}
               className={cn(
-                'text-muted hover:bg-surface/70 hover:text-heading focus-visible:bg-surface/70 focus-visible:ring-focus relative flex min-h-20 items-center gap-4 rounded-xl border border-transparent bg-transparent px-4 text-left transition focus-visible:ring-2 focus-visible:outline-none',
+                'text-muted hover:bg-surface/70 hover:text-heading focus:bg-surface/70 focus:text-heading relative flex min-h-20 items-center gap-4 rounded-xl border border-transparent bg-transparent px-4 text-left transition focus:outline-none',
                 selected && 'bg-brand/10 text-heading',
               )}
             >

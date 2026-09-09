@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import {
   CodeIcon,
   FolderOpenIcon,
@@ -6,7 +7,6 @@ import {
 } from '@phosphor-icons/react'
 import { Button } from '../../components/Button'
 import { FormField } from '../../components/FormField'
-import { InlineAlert } from '../../components/InlineAlert'
 import { Input } from '../../components/Input'
 import {
   ProviderPicker,
@@ -49,89 +49,87 @@ export const RepositoriesStep = ({
   onRemove,
   onBrowse,
   hasError,
-}: Props): React.JSX.Element => (
-  <div className="grid gap-6">
-    <ProviderPicker
-      label="Provider repozytoriów"
-      options={providers}
-      value={provider}
-      onChange={onProviderChange}
-    />
-    {repositories.map((repo, index) => (
-      <div
-        className="border-border bg-page-deep grid gap-5 rounded-2xl border p-5"
-        key={index}
-      >
-        <div className="flex items-center justify-between">
-          <h3 className="text-heading font-semibold">
-            Repozytorium {index + 1}
-          </h3>
+}: Props): React.JSX.Element => {
+  const firstBrowseRef = useRef<HTMLButtonElement>(null)
+
+  useEffect(() => {
+    if (!provider) return
+    const frame = requestAnimationFrame(() => firstBrowseRef.current?.focus())
+    return () => cancelAnimationFrame(frame)
+  }, [provider])
+
+  return (
+    <div className="grid gap-6">
+      <ProviderPicker
+        label="Provider repozytoriów"
+        options={providers}
+        value={provider}
+        onChange={onProviderChange}
+      />
+      {repositories.map((repo, index) => (
+        <div className="bg-page-deep grid gap-5 rounded-2xl p-5" key={index}>
           {repositories.length > 1 && (
-            <Button
-              type="button"
-              appearance="ghost"
-              size="icon"
-              aria-label={`Usuń repozytorium ${index + 1}`}
-              onClick={() => onRemove(index)}
-            >
-              <XIcon aria-hidden="true" />
-            </Button>
+            <div className="flex justify-end">
+              <Button
+                type="button"
+                appearance="ghost"
+                size="icon"
+                aria-label={`Usuń repozytorium ${index + 1}`}
+                onClick={() => onRemove(index)}
+              >
+                <XIcon aria-hidden="true" />
+              </Button>
+            </div>
           )}
+          <FormField id={`repo-path-${index}`} label="Repozytorium" required>
+            <div className="flex gap-2">
+              <Button
+                ref={index === 0 ? firstBrowseRef : undefined}
+                type="button"
+                appearance="ghost"
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') event.stopPropagation()
+                }}
+                onClick={() => onBrowse(index, 'path')}
+              >
+                <FolderOpenIcon aria-hidden="true" /> Przeglądaj
+              </Button>
+              <Input
+                id={`repo-path-${index}`}
+                value={repo.path}
+                onChange={(event) =>
+                  onUpdate(index, 'path', event.target.value)
+                }
+                hasError={Boolean(hasError && !repo.path)}
+              />
+            </div>
+          </FormField>
+          <FormField id={`worktree-path-${index}`} label="Worktree" required>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                appearance="ghost"
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') event.stopPropagation()
+                }}
+                onClick={() => onBrowse(index, 'worktree')}
+              >
+                <FolderOpenIcon aria-hidden="true" /> Przeglądaj
+              </Button>
+              <Input
+                id={`worktree-path-${index}`}
+                value={repo.worktree}
+                onChange={(event) =>
+                  onUpdate(index, 'worktree', event.target.value)
+                }
+              />
+            </div>
+          </FormField>
         </div>
-        <FormField
-          id={`repo-path-${index}`}
-          label="Folder repozytorium"
-          hint="Ścieżka dostępna dla lokalnego backendu"
-          required
-        >
-          <div className="flex gap-2">
-            <Input
-              id={`repo-path-${index}`}
-              value={repo.path}
-              onChange={(event) => onUpdate(index, 'path', event.target.value)}
-              placeholder="/home/użytkownik/projekt"
-              hasError={Boolean(hasError && !repo.path)}
-            />
-            <Button
-              type="button"
-              appearance="ghost"
-              onClick={() => onBrowse(index, 'path')}
-            >
-              <FolderOpenIcon aria-hidden="true" /> Przeglądaj
-            </Button>
-          </div>
-        </FormField>
-        <FormField
-          id={`worktree-path-${index}`}
-          label="Katalog worktree"
-          hint="Katalog roboczy dla agenta"
-          required
-        >
-          <div className="flex gap-2">
-            <Input
-              id={`worktree-path-${index}`}
-              value={repo.worktree}
-              onChange={(event) =>
-                onUpdate(index, 'worktree', event.target.value)
-              }
-              placeholder="/home/użytkownik/worktrees/projekt"
-            />
-            <Button
-              type="button"
-              appearance="ghost"
-              onClick={() => onBrowse(index, 'worktree')}
-            >
-              <FolderOpenIcon aria-hidden="true" /> Przeglądaj
-            </Button>
-          </div>
-        </FormField>
-      </div>
-    ))}
-    <Button type="button" appearance="ghost" onClick={onAdd}>
-      + Dodaj kolejne repozytorium
-    </Button>
-    <InlineAlert tone="info">
-      Każde repozytorium może używać osobnego worktree.
-    </InlineAlert>
-  </div>
-)
+      ))}
+      <Button type="button" appearance="ghost" onClick={onAdd}>
+        + Dodaj kolejne repozytorium
+      </Button>
+    </div>
+  )
+}
