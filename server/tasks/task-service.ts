@@ -7,6 +7,7 @@ import type { ProjectService } from '../projects/project-service.js'
 const githubIssueSchema = z.object({
   number: z.number().int().positive(),
   title: z.string(),
+  body: z.string().nullable().optional(),
   url: z.string().url(),
   labels: z.array(z.object({ name: z.string() })),
   updatedAt: z.string(),
@@ -15,6 +16,7 @@ const githubIssueSchema = z.object({
 const gitlabIssueSchema = z.object({
   iid: z.number().int().positive(),
   title: z.string(),
+  description: z.string().nullable().optional(),
   web_url: z.string().url(),
   labels: z.array(z.string()),
   updated_at: z.string(),
@@ -88,7 +90,7 @@ export class TaskService {
         '--limit',
         '100',
         '--json',
-        'number,title,url,labels,updatedAt',
+        'number,title,body,url,labels,updatedAt',
       ],
       timeoutMs: 20_000,
     })
@@ -107,6 +109,7 @@ export class TaskService {
         repository,
         externalId: issue.number,
         title: issue.title,
+        description: issue.body ?? '',
         url: issue.url,
         status: statusFromLabels(labels),
         labels,
@@ -147,6 +150,7 @@ export class TaskService {
       repository,
       externalId: issue.iid,
       title: issue.title,
+      description: issue.description ?? '',
       url: issue.web_url,
       status: statusFromLabels(issue.labels),
       labels: issue.labels,

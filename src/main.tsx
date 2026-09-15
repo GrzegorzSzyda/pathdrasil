@@ -1,5 +1,10 @@
 import { StrictMode, useEffect, useState } from 'react'
 import { createRoot } from 'react-dom/client'
+import '@fontsource/ibm-plex-mono/600.css'
+import '@fontsource/manrope/400.css'
+import '@fontsource/manrope/500.css'
+import '@fontsource/manrope/600.css'
+import '@fontsource/manrope/700.css'
 import '@fontsource/nunito-sans/400.css'
 import '@fontsource/nunito-sans/600.css'
 import '@fontsource/nunito-sans/700.css'
@@ -19,6 +24,7 @@ import { requestJson } from './lib/api'
 import { ProjectPage } from './pages/ProjectPage'
 import { ProjectSetupPage } from './pages/ProjectSetupPage'
 import { WelcomePage } from './pages/WelcomePage'
+import { WorkflowPage } from './pages/WorkflowPage'
 import './tailwind.css'
 
 const WelcomeRoute = (): React.JSX.Element => {
@@ -156,6 +162,7 @@ const App = (): React.JSX.Element => {
     <Routes location={location}>
       <Route path="/" element={<WelcomeRoute />} />
       <Route path="/projects/new/*" element={<SetupRoute />} />
+      <Route path="/projects/:id/workflow" element={<WorkflowPage />} />
       <Route path="/projects/:id" element={<ProjectPage />} />
       <Route path="/projects/created" element={<CreatedRoute />} />
       <Route path="*" element={<WelcomeRoute />} />

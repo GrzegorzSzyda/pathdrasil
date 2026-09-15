@@ -8,6 +8,7 @@ export const taskSummarySchema = z.object({
   repository: z.string(),
   externalId: z.number().int().positive(),
   title: z.string(),
+  description: z.string(),
   url: z.string().url(),
   status: taskStatusSchema,
   labels: z.array(z.string()),

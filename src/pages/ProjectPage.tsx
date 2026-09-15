@@ -1,9 +1,5 @@
-import { useEffect, useState } from 'react'
-import {
-  ArrowClockwiseIcon,
-  CheckCircleIcon,
-  GithubLogoIcon,
-} from '@phosphor-icons/react'
+import { useCallback, useEffect, useState } from 'react'
+import { ArrowClockwiseIcon, CheckCircleIcon } from '@phosphor-icons/react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { projectSchema, type Project } from '../../shared/api/projects'
 import { tasksResponseSchema, type TaskSummary } from '../../shared/api/tasks'
@@ -12,6 +8,7 @@ import { InlineAlert } from '../components/InlineAlert'
 import { Topbar } from '../components/Topbar'
 import { requestJson } from '../lib/api'
 
+/** Dashboard projektu: podsumowanie stanu, bez planszy workflow. */
 export const ProjectPage = (): React.JSX.Element => {
   const { id = '' } = useParams()
   const navigate = useNavigate()
@@ -21,35 +18,50 @@ export const ProjectPage = (): React.JSX.Element => {
   const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState('')
 
+  const loadTasks = useCallback(
+    async (refresh = false) => {
+      setRefreshing(refresh)
+      try {
+        const response = await requestJson(
+          `/api/projects/${encodeURIComponent(id)}/tasks${refresh ? '?refresh=true' : ''}`,
+          tasksResponseSchema,
+        )
+        setTasks(response.tasks)
+        setError('')
+      } catch (caught) {
+        setError(
+          caught instanceof Error
+            ? caught.message
+            : 'Nie udało się zsynchronizować tasków.',
+        )
+      } finally {
+        setRefreshing(false)
+      }
+    },
+    [id],
+  )
+
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape') return
-      event.preventDefault()
-      navigate('/')
+      const target = event.target as HTMLElement | null
+      if (
+        target?.matches('input, textarea, select, [contenteditable="true"]') ||
+        event.ctrlKey ||
+        event.metaKey ||
+        event.altKey
+      )
+        return
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        navigate('/')
+      } else if (event.key.toLowerCase() === 'w' && project) {
+        event.preventDefault()
+        navigate(`/projects/${encodeURIComponent(id)}/workflow`)
+      }
     }
     document.addEventListener('keydown', onKeyDown)
     return () => document.removeEventListener('keydown', onKeyDown)
-  }, [navigate])
-
-  const loadTasks = async (refresh = false) => {
-    setRefreshing(refresh)
-    try {
-      const response = await requestJson(
-        `/api/projects/${encodeURIComponent(id)}/tasks${refresh ? '?refresh=true' : ''}`,
-        tasksResponseSchema,
-      )
-      setTasks(response.tasks)
-      setError('')
-    } catch (caught) {
-      setError(
-        caught instanceof Error
-          ? caught.message
-          : 'Nie udało się zsynchronizować tasków.',
-      )
-    } finally {
-      setRefreshing(false)
-    }
-  }
+  }, [id, navigate, project])
 
   useEffect(() => {
     let active = true
@@ -62,26 +74,22 @@ export const ProjectPage = (): React.JSX.Element => {
     ])
       .then(([projectResult, tasksResult]) => {
         if (!active) return
-        if (projectResult.status === 'fulfilled') {
+        if (projectResult.status === 'fulfilled')
           setProject(projectResult.value)
-        } else {
+        else
           setError(
             projectResult.reason instanceof Error
               ? projectResult.reason.message
               : 'Nie udało się otworzyć projektu.',
           )
-          return
-        }
-        if (tasksResult.status === 'fulfilled') {
+        if (tasksResult.status === 'fulfilled')
           setTasks(tasksResult.value.tasks)
-          setError('')
-        } else {
+        else
           setError(
             tasksResult.reason instanceof Error
               ? tasksResult.reason.message
               : 'Nie udało się zsynchronizować tasków.',
           )
-        }
       })
       .finally(() => {
         if (active) setLoading(false)
@@ -98,12 +106,18 @@ export const ProjectPage = (): React.JSX.Element => {
 
   return (
     <main className="bg-page text-text min-h-screen px-6 py-6 sm:px-10">
-      <Topbar />
+      <Topbar
+        project={
+          project
+            ? { id, name: project.name, activeView: 'dashboard' }
+            : undefined
+        }
+      />
       <div className="mx-auto min-h-[calc(100vh-3rem)] w-full max-w-6xl">
         <div className="py-10">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <p className="text-brand text-sm font-semibold">Projekt</p>
+              <p className="text-brand text-sm font-semibold">Dashboard</p>
               <h1 className="text-heading mt-2 text-4xl font-semibold">
                 {project?.name ?? (loading ? 'Ładowanie…' : 'Projekt')}
               </h1>
@@ -157,44 +171,6 @@ export const ProjectPage = (): React.JSX.Element => {
                 providerze.
               </p>
             </div>
-          )}
-          {tasks.length > 0 && (
-            <section className="mt-8" aria-labelledby="tasks-heading">
-              <h2
-                id="tasks-heading"
-                className="text-heading text-2xl font-semibold"
-              >
-                Workflow
-              </h2>
-              <div className="mt-4 grid gap-3">
-                {tasks.map((task) => (
-                  <a
-                    key={task.id}
-                    href={task.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="border-border bg-page-deep hover:bg-surface flex items-center gap-4 rounded-xl border p-4 transition"
-                  >
-                    <GithubLogoIcon className="text-muted shrink-0" size={22} />
-                    <span className="min-w-0 flex-1">
-                      <strong className="text-heading block truncate">
-                        {task.title}
-                      </strong>
-                      <span className="text-muted mt-1 block text-sm">
-                        {task.repository} · #{task.externalId}
-                      </span>
-                    </span>
-                    <span className="bg-surface text-muted rounded px-2 py-1 text-xs">
-                      {task.status === 'in-progress'
-                        ? 'W toku'
-                        : task.status === 'review'
-                          ? 'Review'
-                          : 'Do zrobienia'}
-                    </span>
-                  </a>
-                ))}
-              </div>
-            </section>
           )}
         </div>
       </div>

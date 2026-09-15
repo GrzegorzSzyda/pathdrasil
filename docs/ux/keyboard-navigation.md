@@ -6,6 +6,7 @@
 | ----------------------- | ------------------- | ------------------------------------------- |
 | pusty widok główny      | `N` lub `Enter`     | rozpocznij tworzenie projektu               |
 | dowolny widok aplikacji | `?`                 | pokaż kontekstową pomoc skrótów             |
+| widok projektu          | `D` / `W`           | otwórz Dashboard / Workflow                 |
 | dialog                  | `Escape`            | zamknij dialog i przywróć poprzedni focus   |
 | kreator                 | `Alt+ArrowLeft`     | poprzednia strona                           |
 | kreator                 | `Alt+ArrowRight`    | następna strona, jeżeli jest poprawna       |
@@ -33,3 +34,10 @@ Numery nie omijają walidacji ani nie otwierają jeszcze nieodblokowanego kroku.
 - Błąd walidacji przenosi focus do podsumowania błędów, a komunikaty są powiązane z polami przez `aria-describedby`.
 
 Skróty będziemy dopracowywać podczas implementowania konkretnych widoków. Rejestr skrótów pozostaje wspólny, aby dialog pomocy i obsługa klawiszy korzystały z tego samego źródła danych.
+
+## Workflow projektu
+
+- W kolumnie „Do przejrzenia” `ArrowUp` / `ArrowDown` przechodzą między kartami, a `Home` / `End` wybierają pierwszą lub ostatnią kartę.
+- `Enter` lub `Space` otwiera podgląd taska. Focus trafia na jego nagłówek, a `Tab` przechodzi dalej przez link providera i przycisk zamknięcia.
+- Pierwszy `Escape` zamyka podgląd i przywraca focus na kartę, która go otworzyła. Dopiero kolejny `Escape` wraca do listy projektów.
+- `R` uruchamia synchronizację workflow, jeśli synchronizacja już nie trwa.

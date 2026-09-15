@@ -53,6 +53,7 @@ describe('TaskService', () => {
             {
               number: 12,
               title: 'Build the backend',
+              body: 'Implement the API.',
               url: 'https://github.com/octocat/pathdrasil/issues/12',
               labels: [{ name: 'in-progress' }],
               updatedAt: '2026-09-08T10:00:00Z',
@@ -75,7 +76,58 @@ describe('TaskService', () => {
     expect(first[0]).toMatchObject({
       id: 'github:octocat/pathdrasil:12',
       status: 'in-progress',
+      description: 'Implement the API.',
     })
     expect(calls).toBe(1)
   })
+
+  it.each([
+    { provider: 'github-issues', value: null },
+    { provider: 'gitlab-issues', value: null },
+  ])(
+    'normalizes a null description from $provider to an empty description',
+    async ({ provider, value }) => {
+      const runner: CommandRunner = {
+        async run() {
+          return {
+            ok: true,
+            stdout: JSON.stringify([
+              provider === 'github-issues'
+                ? {
+                    number: 3,
+                    title: 'Issue',
+                    body: value,
+                    url: 'https://github.com/octocat/pathdrasil/issues/3',
+                    labels: [],
+                    updatedAt: '2026-09-08T10:00:00Z',
+                  }
+                : {
+                    iid: 3,
+                    title: 'Issue',
+                    description: value,
+                    web_url: 'https://gitlab.com/octocat/pathdrasil/-/issues/3',
+                    labels: [],
+                    updated_at: '2026-09-08T10:00:00Z',
+                  },
+            ]),
+            stderr: '',
+            timedOut: false,
+          }
+        },
+      }
+      const projects = {
+        async get() {
+          return {
+            ...project,
+            taskManager: {
+              ...project.taskManager,
+              providerId: provider,
+            },
+          }
+        },
+      } as unknown as ProjectService
+      const task = await new TaskService(runner, projects).list(project.id)
+      expect(task[0]?.description).toBe('')
+    },
+  )
 })

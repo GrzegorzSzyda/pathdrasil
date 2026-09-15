@@ -1,0 +1,406 @@
+.workflow-page {
+  font-family: Manrope, ui-sans-serif, system-ui, sans-serif;
+}
+
+.workflow-board,
+.workflow-board-scroll,
+.workflow-columns {
+  height: 100%;
+  min-height: 0;
+}
+
+.workflow-board {
+  overflow: hidden;
+}
+
+.workflow-board-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.workflow-columns {
+  display: flex;
+  min-width: 1080px;
+  isolation: isolate;
+}
+
+.workflow-column {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  min-width: 180px;
+  flex: 1 1 20%;
+  flex-direction: column;
+  background: #171c24;
+  transition:
+    flex-basis 320ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    min-width 320ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 220ms ease,
+    filter 220ms ease,
+    box-shadow 250ms ease;
+}
+
+.workflow-board.has-task .workflow-column:not(.is-task-open) {
+  min-width: 180px;
+  flex-basis: 14%;
+  opacity: 0.48;
+  filter: saturate(0.45);
+}
+
+.workflow-column.is-task-open {
+  z-index: 3;
+  min-width: 720px;
+  flex-basis: 58%;
+  background: #181e27;
+  box-shadow:
+    -18px 0 38px #0d1117c2,
+    18px 0 38px #0d1117c2;
+}
+
+.workflow-column-header {
+  position: relative;
+  display: flex;
+  height: 56px;
+  flex: 0 0 56px;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  overflow: hidden;
+}
+
+.workflow-column-title {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 9px;
+  margin: 0;
+  overflow: hidden;
+  color: #c5ceda;
+  font-size: clamp(14px, 1.25vw, 18px);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.035em;
+  white-space: nowrap;
+}
+
+.workflow-column-title > span:nth-child(2) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.workflow-column-title svg {
+  flex: 0 0 auto;
+  color: #667287;
+  font-size: 16px;
+}
+
+.workflow-column-count {
+  color: #586476;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.workflow-readonly {
+  position: absolute;
+  bottom: 3px;
+  left: 20px;
+  color: #586476;
+  font:
+    600 8px/1 'IBM Plex Mono',
+    ui-monospace,
+    monospace;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.workflow-cards {
+  width: 100%;
+  min-height: 0;
+  flex: 1;
+  margin: 0;
+  padding: 12px;
+  overflow-y: auto;
+  list-style: none;
+  scrollbar-color: #3a3d3b transparent;
+  scrollbar-width: thin;
+}
+
+.workflow-cards > li {
+  margin-bottom: 10px;
+}
+
+.workflow-column.is-task-open .workflow-cards,
+.workflow-column.is-task-open .workflow-empty {
+  width: 42%;
+}
+
+.workflow-card {
+  display: block;
+  width: 100%;
+  min-height: 78px;
+  padding: 12px 15px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 8px;
+  background: #1d2430;
+  color: #aab4c3;
+  text-align: left;
+}
+
+.workflow-card-button {
+  cursor: pointer;
+  transition:
+    background 140ms ease,
+    transform 140ms ease;
+}
+
+.workflow-card-button:hover {
+  background: #232c3a;
+}
+
+.workflow-card-button:active {
+  transform: scale(0.99);
+}
+
+.workflow-card-button:focus-visible,
+.workflow-card-button.is-selected {
+  background: #273140;
+  outline: 0;
+  box-shadow:
+    inset 3px 0 0 #c5ceda,
+    0 0 0 2px #758399;
+}
+
+.workflow-card-meta {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 6px;
+  color: #586476;
+  font:
+    600 9px/1 'IBM Plex Mono',
+    ui-monospace,
+    monospace;
+  letter-spacing: 0.03em;
+}
+
+.workflow-card-meta > span:first-child,
+.workflow-card-meta time {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.workflow-card-meta time {
+  text-align: right;
+}
+
+.workflow-card-tags {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 3px;
+}
+
+.workflow-card-tag {
+  max-width: 72px;
+  padding: 4px 6px;
+  overflow: hidden;
+  border-radius: 4px;
+  background: #242b36;
+  color: #717d8e;
+  font-size: 8px;
+  line-height: 1;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.workflow-card-title {
+  display: block;
+  margin-top: 9px;
+  overflow: hidden;
+  color: #c5ceda;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: -0.012em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.workflow-card-repository {
+  display: block;
+  margin-top: 4px;
+  overflow: hidden;
+  color: #667287;
+  font:
+    600 9px/1.2 'IBM Plex Mono',
+    ui-monospace,
+    monospace;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.workflow-empty {
+  display: grid;
+  min-height: 72px;
+  margin: 12px;
+  place-items: center;
+  border-radius: 8px;
+  background: #191f28;
+  color: #4d596b;
+  font-size: 11px;
+}
+
+.workflow-task-preview {
+  position: absolute;
+  top: 56px;
+  right: 0;
+  bottom: 0;
+  width: 58%;
+  padding: 28px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  border-top-left-radius: 22px;
+  background: #141922;
+  animation: workflow-detail-in 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.workflow-preview-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border: 0;
+  border-radius: 7px;
+  background: #222a36;
+  color: #aab4c3;
+  cursor: pointer;
+}
+
+.workflow-preview-close:hover {
+  background: #283342;
+  color: #fff;
+}
+
+.workflow-preview-close:focus-visible,
+.workflow-preview-link:focus-visible {
+  outline: 2px solid #758399;
+  outline-offset: 2px;
+}
+
+.workflow-preview-eyebrow {
+  margin: 0 46px 18px 0;
+  color: #c5ceda;
+  font:
+    700 10px/1 'IBM Plex Mono',
+    ui-monospace,
+    monospace;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.workflow-preview-title {
+  margin: 0;
+  color: #d9e0e9;
+  font-size: clamp(20px, 2vw, 30px);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.045em;
+  outline: 0;
+}
+
+.workflow-preview-body {
+  margin: 20px 0;
+  color: #b6bab6;
+  font-size: 13px;
+  line-height: 1.65;
+  white-space: pre-wrap;
+}
+
+.workflow-preview-link {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  border: 1px solid #354254;
+  border-radius: 7px;
+  background: #202a37;
+  color: #c2ccd8;
+  font-size: 11px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.workflow-preview-link:hover {
+  border-color: #6d8197;
+  background: #2d3b4b;
+  color: #f2f5f8;
+}
+
+.workflow-preview-details {
+  margin: 32px 0 0;
+}
+
+.workflow-preview-details > div {
+  margin-top: 28px;
+}
+
+.workflow-preview-details dt {
+  margin-bottom: 9px;
+  color: #717671;
+  font:
+    600 9px/1 'IBM Plex Mono',
+    ui-monospace,
+    monospace;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.workflow-preview-details dd {
+  margin: 0;
+  color: #e1e4df;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+@keyframes workflow-detail-in {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@media (max-width: 760px) {
+  .workflow-columns {
+    min-width: 960px;
+  }
+
+  .workflow-column-header {
+    height: 52px;
+    flex-basis: 52px;
+    padding: 10px 14px;
+  }
+
+  .workflow-task-preview {
+    top: 52px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .workflow-column,
+  .workflow-card-button,
+  .workflow-task-preview {
+    transition: none;
+    animation: none;
+  }
+}
