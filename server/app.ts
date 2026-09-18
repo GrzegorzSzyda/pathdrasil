@@ -1,10 +1,16 @@
 import { serveStatic } from '@hono/node-server/serve-static'
 import { Hono } from 'hono'
+import { streamSSE } from 'hono/streaming'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
 import { randomUUID } from 'node:crypto'
 import { resolve } from 'node:path'
 import type { Logger } from 'pino'
 import type { ZodType } from 'zod'
+import {
+  createConversationMessageRequestSchema,
+  type ConversationEvent,
+  type CreateConversationMessageRequest,
+} from '../shared/api/conversations.js'
 import {
   createProjectRequestSchema,
   type CreateProjectRequest,
@@ -14,6 +20,9 @@ import {
   type VerifyRepositoryRequest,
 } from '../shared/api/repositories.js'
 import { readConfig } from './config.js'
+import { CodexAdapter } from './conversations/codex-adapter.js'
+import { ConversationService } from './conversations/conversation-service.js'
+import { ConversationStore } from './conversations/conversation-store.js'
 import { AppError } from './errors/app-error.js'
 import { createCommandRunner } from './infrastructure/command-runner.js'
 import { createLogger } from './infrastructure/logger.js'
@@ -37,6 +46,7 @@ export type AppDependencies = {
   repositories?: RepositoryService
   projects?: ProjectService
   tasks?: TaskService
+  conversations?: ConversationService
 }
 
 const readJson = async <T>(
@@ -83,6 +93,16 @@ export const createApp = (dependencies: AppDependencies = {}) => {
       integrations,
     )
   const tasks = dependencies.tasks ?? new TaskService(runner, projects)
+  const conversations =
+    dependencies.conversations ??
+    new ConversationService(
+      new ConversationStore(
+        resolve(config.dataDirectory, 'conversations.json'),
+      ),
+      projects,
+      tasks,
+      new CodexAdapter(),
+    )
 
   app.use('*', async (context, next) => {
     const requestId = context.req.header('x-request-id') ?? randomUUID()
@@ -167,6 +187,91 @@ export const createApp = (dependencies: AppDependencies = {}) => {
       syncedAt: new Date().toISOString(),
     })
   })
+
+  app.get('/api/projects/:id/tasks/:taskId/conversation', async (context) =>
+    context.json({
+      conversation: await conversations.get(
+        context.req.param('id'),
+        context.req.param('taskId'),
+      ),
+    }),
+  )
+
+  app.post(
+    '/api/projects/:id/tasks/:taskId/conversation/start',
+    async (context) =>
+      context.json(
+        {
+          conversation: await conversations.startInitial(
+            context.req.param('id'),
+            context.req.param('taskId'),
+          ),
+        },
+        202,
+      ),
+  )
+
+  app.post(
+    '/api/projects/:id/tasks/:taskId/conversation/messages',
+    async (context) => {
+      const input = await readJson<CreateConversationMessageRequest>(
+        context.req.raw,
+        createConversationMessageRequestSchema,
+      )
+      return context.json(
+        {
+          conversation: await conversations.send(
+            context.req.param('id'),
+            context.req.param('taskId'),
+            input.content,
+          ),
+        },
+        202,
+      )
+    },
+  )
+
+  app.post(
+    '/api/projects/:id/tasks/:taskId/conversation/cancel',
+    async (context) => {
+      await conversations.cancel(
+        context.req.param('id'),
+        context.req.param('taskId'),
+      )
+      return context.json({ cancelled: true as const })
+    },
+  )
+
+  app.get(
+    '/api/projects/:id/tasks/:taskId/conversation/events',
+    async (context) => {
+      const conversation = await conversations.get(
+        context.req.param('id'),
+        context.req.param('taskId'),
+      )
+      return streamSSE(context, async (stream) => {
+        await stream.writeSSE({
+          event: 'snapshot',
+          data: JSON.stringify({ type: 'snapshot', conversation }),
+        })
+        await new Promise<void>((resolve) => {
+          const unsubscribe = conversations.subscribe(
+            conversation.id,
+            (event) => {
+              void stream.writeSSE({
+                event: event.type,
+                data: JSON.stringify(event),
+              })
+            },
+          )
+          stream.onAbort(() => {
+            unsubscribe()
+            resolve()
+          })
+        })
+      })
+    },
+  )
 
   app.all('/api/*', (context) =>
     context.json(

@@ -47,5 +47,33 @@ export const conversationResponseSchema = z.object({
   conversation: conversationSchema,
 })
 
+export const createConversationMessageRequestSchema = z.object({
+  content: z.string().trim().min(1).max(4_000),
+})
+
+export const conversationEventSchema = z.discriminatedUnion('type', [
+  z.object({ type: z.literal('snapshot'), conversation: conversationSchema }),
+  z.object({
+    type: z.literal('complete'),
+    conversationId: z.string().uuid(),
+    messageId: z.string().uuid(),
+  }),
+  z.object({
+    type: z.literal('cancelled'),
+    conversationId: z.string().uuid(),
+    messageId: z.string().uuid(),
+  }),
+  z.object({
+    type: z.literal('error'),
+    conversationId: z.string().uuid(),
+    messageId: z.string().uuid(),
+    message: z.string(),
+  }),
+])
+
 export type Conversation = z.infer<typeof conversationSchema>
 export type ConversationMessage = z.infer<typeof conversationMessageSchema>
+export type ConversationEvent = z.infer<typeof conversationEventSchema>
+export type CreateConversationMessageRequest = z.infer<
+  typeof createConversationMessageRequestSchema
+>
