@@ -40,6 +40,7 @@ type CodexRunInput = {
   prompt: string
   cwd: string
   sessionId?: string
+  additionalDirectories?: string[]
   onEvent(event: CodexEvent): void
 }
 
@@ -98,12 +99,28 @@ export class CodexAdapter {
         }))
   }
 
-  start({ prompt, cwd, sessionId, onEvent }: CodexRunInput): CodexRun {
+  start({
+    prompt,
+    cwd,
+    sessionId,
+    additionalDirectories = [],
+    onEvent,
+  }: CodexRunInput): CodexRun {
     const process = this.spawnProcess(
       this.command,
       sessionId
         ? ['exec', 'resume', '--json', sessionId, '-']
-        : ['exec', '--json', '--sandbox', 'read-only', '-'],
+        : [
+            'exec',
+            '--json',
+            '--sandbox',
+            'read-only',
+            ...additionalDirectories.flatMap((directory) => [
+              '--add-dir',
+              directory,
+            ]),
+            '-',
+          ],
       cwd,
     )
     let cancelled = false

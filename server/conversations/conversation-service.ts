@@ -95,12 +95,10 @@ export class ConversationService {
     const run = this.codex.start({
       cwd: project.repositories[0]?.path ?? process.cwd(),
       sessionId: conversation.agentSessionId,
-      prompt: this.prompt(
-        project.name,
-        task,
-        messages,
-        userContent === undefined,
-      ),
+      additionalDirectories: project.repositories
+        .slice(1)
+        .map((repository) => repository.path),
+      prompt: this.prompt(project, task, messages, userContent === undefined),
       onEvent: (event) => {
         if (event.type === 'thread-started') {
           latest = { ...latest, agentSessionId: event.threadId }
@@ -204,11 +202,11 @@ export class ConversationService {
     this.listeners.get(id)?.forEach((listener) => listener(event))
   }
   private prompt(
-    projectName: string,
+    project: Awaited<ReturnType<ProjectService['get']>>,
     task: TaskSummary,
     messages: ConversationMessage[],
     initial: boolean,
   ): string {
-    return `Jesteś konsultantem technicznym Pathdrasil. Przeglądaj repozytorium tylko, gdy to konieczne; nie modyfikuj plików, issue ani repozytorium. Odpowiadaj po polsku. Projekt: ${projectName}. Task #${task.externalId}: ${task.title}\n${task.description}\nHistoria:\n${messages.map((message) => `${message.role}: ${message.content}`).join('\n')}\n${initial ? 'Podaj krótko cel i najwyżej trzy najważniejsze pytania lub ryzyka; nie parafrazuj opisu.' : ''}`
+    return `Jesteś konsultantem technicznym Pathdrasil. Możesz przeglądać repozytoria tylko do odczytu, gdy potrzebujesz potwierdzić założenie. Nie modyfikuj plików, issue, commitów, branchy, PR/MR ani repozytorium. Odpowiadaj po polsku.\nProjekt: ${project.name}\nRepozytoria: ${project.repositories.map((repository) => repository.slug).join(', ')}\nReguły: taski ${project.rules.taskLanguage}; repozytoria ${project.rules.repositoryLanguage}; aplikacja ${project.rules.pathdrasilLanguage}.\nTask: ${task.provider} · ${task.repository} · #${task.externalId}\nTytuł: ${task.title}\nEtykiety: ${task.labels.join(', ') || 'brak'}\nOpis:\n${task.description || 'Brak opisu.'}\nHistoria:\n${messages.map((message) => `${message.role}: ${message.content}`).join('\n')}\n${initial ? 'Podaj krótko cel i najwyżej trzy najważniejsze pytania lub ryzyka; nie parafrazuj opisu.' : ''}`
   }
 }
