@@ -8,7 +8,6 @@ import type { Logger } from 'pino'
 import type { ZodType } from 'zod'
 import {
   createConversationMessageRequestSchema,
-  type ConversationEvent,
   type CreateConversationMessageRequest,
 } from '../shared/api/conversations.js'
 import {
