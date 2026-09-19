@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { createApp } from './app.js'
+import { createApp, isApprovalAndPublicationMessage } from './app.js'
 import type { CommandRunner } from './infrastructure/command-runner.js'
 import { createLogger } from './infrastructure/logger.js'
 import { createIntegrationRegistry } from './integrations/registry.js'
@@ -69,5 +69,13 @@ describe('HTTP app', () => {
     await expect(response.json()).resolves.toMatchObject({
       error: { code: 'REMOTE_ORIGIN_FORBIDDEN' },
     })
+  })
+})
+
+describe('isApprovalAndPublicationMessage', () => {
+  it('recognizes an explicit approval written in Polish', () => {
+    expect(isApprovalAndPublicationMessage('Akceptuję.')).toBe(true)
+    expect(isApprovalAndPublicationMessage('Akceptujemy ten plan.')).toBe(true)
+    expect(isApprovalAndPublicationMessage('Zapisz notatkę.')).toBe(false)
   })
 })

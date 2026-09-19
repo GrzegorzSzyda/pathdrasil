@@ -30,7 +30,11 @@ export class TaskDraftService {
     return this.store.get({ projectId, taskId })
   }
 
-  async generate(projectId: string, taskId: string): Promise<TaskDraft> {
+  async generate(
+    projectId: string,
+    taskId: string,
+    publishWhenComplete = false,
+  ): Promise<TaskDraft> {
     const [project, task, conversation] = await Promise.all([
       this.projects.get(projectId),
       this.findTask(projectId, taskId),
@@ -52,11 +56,13 @@ export class TaskDraftService {
       plan: existing?.plan ?? [],
       dependencies: existing?.dependencies ?? [],
       questions: existing?.questions ?? [],
-      status:
-        existing?.status === 'approved'
+      status: publishWhenComplete
+        ? 'approved'
+        : existing?.status === 'approved'
           ? 'draft'
           : (existing?.status ?? 'draft'),
       generationStatus: 'generating',
+      ...(publishWhenComplete ? {} : { publishedAt: existing?.publishedAt }),
       createdAt: existing?.createdAt ?? now,
       updatedAt: now,
     }
@@ -83,6 +89,7 @@ export class TaskDraftService {
     void run.done.then(async (result) => {
       this.activeGenerations.delete(draft.id)
       const completedAt = new Date().toISOString()
+      let latest = draft
       try {
         if (result.status !== 'complete')
           throw new Error(
@@ -91,15 +98,17 @@ export class TaskDraftService {
               : 'Generowanie draftu zostało zatrzymane.',
           )
         const content = taskDraftContentSchema.parse(this.parseContent(output))
-        await this.store.save({
+        latest = {
           ...draft,
           ...content,
           generationStatus: 'idle',
           updatedAt: completedAt,
-        })
+        }
+        await this.store.save(latest)
+        if (publishWhenComplete) await this.publish(projectId, taskId)
       } catch (error) {
         await this.store.save({
-          ...draft,
+          ...latest,
           generationStatus: 'failed',
           generationError:
             error instanceof Error
@@ -110,6 +119,13 @@ export class TaskDraftService {
       }
     })
     return draft
+  }
+
+  async generateAndPublish(
+    projectId: string,
+    taskId: string,
+  ): Promise<TaskDraft> {
+    return this.generate(projectId, taskId, true)
   }
 
   async update(

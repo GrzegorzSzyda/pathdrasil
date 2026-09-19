@@ -5,6 +5,7 @@ import {
   conversationResponseSchema,
   type Conversation,
 } from '../../../shared/api/conversations'
+import { taskDraftResponseSchema } from '../../../shared/api/task-drafts'
 import { requestJson } from '../../lib/api'
 
 type TaskConversationProps = {
@@ -22,7 +23,9 @@ export const TaskConversation = ({
   const [error, setError] = useState('')
   const [draft, setDraft] = useState('')
   const [fullscreen, setFullscreen] = useState(false)
+  const [publicationNotice, setPublicationNotice] = useState('')
   const base = `/api/projects/${encodeURIComponent(projectId)}/tasks/${encodeURIComponent(taskId)}/conversation`
+  const draftBase = `/api/projects/${encodeURIComponent(projectId)}/tasks/${encodeURIComponent(taskId)}/draft`
 
   useEffect(() => {
     let active = true
@@ -59,6 +62,27 @@ export const TaskConversation = ({
       events.close()
     }
   }, [base])
+
+  useEffect(() => {
+    if (publicationNotice !== 'Przygotowuję i zapisuję zaakceptowany draft…')
+      return
+    const poll = () =>
+      requestJson(draftBase, taskDraftResponseSchema)
+        .then(({ draft }) => {
+          if (draft?.generationStatus === 'failed')
+            setPublicationNotice(
+              `Nie udało się zapisać: ${draft.generationError || 'spróbuj ponownie.'}`,
+            )
+          else if (draft?.publishedAt)
+            setPublicationNotice('Zaakceptowane ustalenia zapisano w GitHubie.')
+        })
+        .catch(() =>
+          setPublicationNotice('Nie udało się sprawdzić zapisu draftu.'),
+        )
+    void poll()
+    const timer = window.setInterval(() => void poll(), 1_000)
+    return () => window.clearInterval(timer)
+  }, [draftBase, publicationNotice])
 
   return (
     <section
@@ -138,7 +162,13 @@ export const TaskConversation = ({
           event.preventDefault()
           const content = draft.trim()
           if (!content || conversation?.status === 'responding') return
+          const publishesDraft =
+            /(^|[^\p{L}])akcept(?:uję|uje|ujemy|uj(?:ę|emy)?|owano)(?=$|[^\p{L}])/iu.test(
+              content,
+            )
           setDraft('')
+          if (publishesDraft)
+            setPublicationNotice('Przygotowuję i zapisuję zaakceptowany draft…')
           void requestJson(`${base}/messages`, conversationResponseSchema, {
             method: 'POST',
             body: JSON.stringify({ content }),
@@ -193,8 +223,14 @@ export const TaskConversation = ({
           </button>
         </div>
       </form>
+      {publicationNotice && (
+        <p className="mt-2 text-xs text-[#b9d8ff]" role="status">
+          {publicationNotice}
+        </p>
+      )}
       <p className="mt-4 text-xs text-[#77869a]">
-        Tryb konsultacyjny · tylko odczyt repozytoriów
+        Tryb konsultacyjny · tylko odczyt repozytoriów · aby zapisać ustalenia,
+        napisz „Akceptuję”.
       </p>
     </section>
   )

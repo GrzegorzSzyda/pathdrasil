@@ -79,6 +79,11 @@ const isLocalOrigin = (origin: string): boolean => {
   }
 }
 
+export const isApprovalAndPublicationMessage = (content: string): boolean =>
+  /(^|[^\p{L}])akcept(?:uję|uje|ujemy|uj(?:ę|emy)?|owano)(?=$|[^\p{L}])/iu.test(
+    content,
+  )
+
 export const createApp = (dependencies: AppDependencies = {}) => {
   const app = new Hono<{ Variables: AppVariables }>()
   const logger = dependencies.logger ?? createLogger('info')
@@ -278,16 +283,16 @@ export const createApp = (dependencies: AppDependencies = {}) => {
         context.req.raw,
         createConversationMessageRequestSchema,
       )
-      return context.json(
-        {
-          conversation: await conversations.send(
-            context.req.param('id'),
-            context.req.param('taskId'),
-            input.content,
-          ),
-        },
-        202,
+      const projectId = context.req.param('id')
+      const taskId = context.req.param('taskId')
+      const conversation = await conversations.send(
+        projectId,
+        taskId,
+        input.content,
       )
+      if (isApprovalAndPublicationMessage(input.content))
+        await taskDrafts.generateAndPublish(projectId, taskId)
+      return context.json({ conversation }, 202)
     },
   )
 
