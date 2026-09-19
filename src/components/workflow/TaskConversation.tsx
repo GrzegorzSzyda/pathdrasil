@@ -7,6 +7,7 @@ import {
 } from '../../../shared/api/conversations'
 import { taskDraftResponseSchema } from '../../../shared/api/task-drafts'
 import { requestJson } from '../../lib/api'
+import { renderConversationMarkdown } from './conversation-markdown'
 
 type TaskConversationProps = {
   projectId: string
@@ -147,8 +148,10 @@ export const TaskConversation = ({
             }
           >
             {message.content ? (
-              <div className="space-y-2 [&_code]:rounded [&_code]:bg-[#111720] [&_code]:px-1 [&_h1]:text-lg [&_h2]:text-base [&_li]:ml-4 [&_li]:list-disc">
-                <ReactMarkdown>{message.content}</ReactMarkdown>
+              <div className="space-y-2 [&_code]:rounded [&_code]:bg-[#111720] [&_code]:px-1 [&_h1]:text-lg [&_h2]:text-base [&_h3]:text-sm [&_h3]:font-semibold [&_li]:ml-4 [&_li]:list-disc [&_ol]:space-y-1 [&_p]:leading-relaxed">
+                <ReactMarkdown>
+                  {renderConversationMarkdown(message.content)}
+                </ReactMarkdown>
               </div>
             ) : (
               <TypingIndicator />
