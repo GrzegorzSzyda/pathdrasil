@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { XIcon } from '@phosphor-icons/react'
+import { CornersInIcon, CornersOutIcon, XIcon } from '@phosphor-icons/react'
 import ReactMarkdown from 'react-markdown'
 import {
   conversationResponseSchema,
@@ -62,28 +62,51 @@ export const TaskConversation = ({
 
   return (
     <section
-      className={`flex min-w-[320px] flex-1 flex-col border-l border-[#293342] bg-[#111720] p-5 ${fullscreen ? 'fixed inset-0 z-50 border-0' : ''}`}
+      className={`flex min-w-[320px] flex-1 flex-col border-l border-[#293342] bg-[#111720] p-5 ${fullscreen ? 'fixed top-[72px] right-0 bottom-0 left-0 z-50 border-0' : ''}`}
       aria-label="Rozmowa o tasku"
     >
+      {fullscreen && (
+        <button
+          type="button"
+          className="absolute top-5 right-5 z-10 grid size-10 place-items-center rounded-[7px] text-white hover:bg-[#283342] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#758399]"
+          onClick={() => setFullscreen(false)}
+          aria-label="Zamknij pełny ekran"
+        >
+          <CornersInIcon aria-hidden="true" size={22} />
+        </button>
+      )}
       <div className="flex items-center justify-between gap-3">
         <p className="font-['IBM_Plex_Mono'] text-[10px] font-semibold tracking-[0.12em] text-[#8fa0b6] uppercase">
           Rozmowa z AI
         </p>
-        <button
-          type="button"
-          className="grid size-[30px] place-items-center rounded-[7px] text-[#aab4c3] hover:bg-[#283342] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#758399]"
-          onClick={onClose}
-          aria-label="Zamknij rozmowę"
-        >
-          <XIcon aria-hidden="true" size={18} />
-        </button>
-        <button
-          type="button"
-          className="ml-auto text-xs text-[#9fb0c4] hover:text-white"
-          onClick={() => setFullscreen((open) => !open)}
-        >
-          {fullscreen ? 'Wróć do taska' : 'Pełny ekran'}
-        </button>
+        <div className="ml-auto flex items-center gap-1">
+          {!fullscreen && (
+            <button
+              type="button"
+              className="grid size-[30px] place-items-center rounded-[7px] text-[#aab4c3] hover:bg-[#283342] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#758399]"
+              onClick={() => setFullscreen((open) => !open)}
+              aria-label={
+                fullscreen ? 'Zamknij pełny ekran' : 'Otwórz pełny ekran'
+              }
+            >
+              {fullscreen ? (
+                <CornersInIcon aria-hidden="true" size={18} />
+              ) : (
+                <CornersOutIcon aria-hidden="true" size={18} />
+              )}
+            </button>
+          )}
+          {!fullscreen && (
+            <button
+              type="button"
+              className="grid size-[30px] place-items-center rounded-[7px] text-[#aab4c3] hover:bg-[#283342] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#758399]"
+              onClick={onClose}
+              aria-label="Zamknij rozmowę"
+            >
+              <XIcon aria-hidden="true" size={18} />
+            </button>
+          )}
+        </div>
       </div>
       <div className="mt-5 min-h-0 flex-1 [scrollbar-width:thin] [scrollbar-color:#334155_transparent] space-y-3 overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#334155] [&::-webkit-scrollbar-thumb:hover]:bg-[#4b6079]">
         {error && <p className="text-sm text-red-300">{error}</p>}
