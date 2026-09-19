@@ -17,6 +17,7 @@ type WorkflowColumnProps = {
   onClosePreview: () => void
   dimmed: boolean
   projectId: string
+  onTaskPublished: () => void
 }
 
 export const WorkflowColumn = ({
@@ -31,6 +32,7 @@ export const WorkflowColumn = ({
   onClosePreview,
   dimmed,
   projectId,
+  onTaskPublished,
 }: WorkflowColumnProps): React.JSX.Element => {
   const [conversationOpen, setConversationOpen] = useState(false)
   const taskOpen = column.id === 'todo' && selectedTask !== null
@@ -111,6 +113,7 @@ export const WorkflowColumn = ({
           conversationOpen={conversationOpen}
           onOpenConversation={() => setConversationOpen(true)}
           onCloseConversation={() => setConversationOpen(false)}
+          onTaskPublished={onTaskPublished}
         />
       )}
     </section>

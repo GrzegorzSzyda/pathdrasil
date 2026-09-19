@@ -5,24 +5,30 @@ import {
   conversationResponseSchema,
   type Conversation,
 } from '../../../shared/api/conversations'
+import { taskDraftResponseSchema } from '../../../shared/api/task-drafts'
 import { requestJson } from '../../lib/api'
+import { renderConversationMarkdown } from './conversation-markdown'
 
 type TaskConversationProps = {
   projectId: string
   taskId: string
   onClose: () => void
+  onTaskPublished: () => void
 }
 
 export const TaskConversation = ({
   projectId,
   taskId,
   onClose,
+  onTaskPublished,
 }: TaskConversationProps) => {
   const [conversation, setConversation] = useState<Conversation | null>(null)
   const [error, setError] = useState('')
   const [draft, setDraft] = useState('')
   const [fullscreen, setFullscreen] = useState(false)
+  const [publicationNotice, setPublicationNotice] = useState('')
   const base = `/api/projects/${encodeURIComponent(projectId)}/tasks/${encodeURIComponent(taskId)}/conversation`
+  const draftBase = `/api/projects/${encodeURIComponent(projectId)}/tasks/${encodeURIComponent(taskId)}/draft`
 
   useEffect(() => {
     let active = true
@@ -59,6 +65,28 @@ export const TaskConversation = ({
       events.close()
     }
   }, [base])
+
+  useEffect(() => {
+    if (publicationNotice !== 'Przygotowuję i zapisuję zaakceptowany draft…')
+      return
+    const poll = () =>
+      requestJson(draftBase, taskDraftResponseSchema)
+        .then(({ draft }) => {
+          if (draft?.generationStatus === 'failed')
+            setPublicationNotice(
+              `Nie udało się zapisać: ${draft.generationError || 'spróbuj ponownie.'}`,
+            )
+          else if (draft?.publishedAt)
+            setPublicationNotice('Zaakceptowane ustalenia zapisano w GitHubie.')
+          if (draft?.publishedAt) onTaskPublished()
+        })
+        .catch(() =>
+          setPublicationNotice('Nie udało się sprawdzić zapisu draftu.'),
+        )
+    void poll()
+    const timer = window.setInterval(() => void poll(), 1_000)
+    return () => window.clearInterval(timer)
+  }, [draftBase, onTaskPublished, publicationNotice])
 
   return (
     <section
@@ -123,8 +151,10 @@ export const TaskConversation = ({
             }
           >
             {message.content ? (
-              <div className="space-y-2 [&_code]:rounded [&_code]:bg-[#111720] [&_code]:px-1 [&_h1]:text-lg [&_h2]:text-base [&_li]:ml-4 [&_li]:list-disc">
-                <ReactMarkdown>{message.content}</ReactMarkdown>
+              <div className="space-y-2 [&_code]:rounded [&_code]:bg-[#111720] [&_code]:px-1 [&_h1]:text-lg [&_h2]:text-base [&_h3]:text-sm [&_h3]:font-semibold [&_li]:ml-4 [&_li]:list-disc [&_ol]:space-y-1 [&_p]:leading-relaxed">
+                <ReactMarkdown>
+                  {renderConversationMarkdown(message.content)}
+                </ReactMarkdown>
               </div>
             ) : (
               <TypingIndicator />
@@ -143,7 +173,13 @@ export const TaskConversation = ({
             method: 'POST',
             body: JSON.stringify({ content }),
           })
-            .then((response) => setConversation(response.conversation))
+            .then((response) => {
+              setConversation(response.conversation)
+              if (response.publicationRequested)
+                setPublicationNotice(
+                  'Przygotowuję i zapisuję zaakceptowany draft…',
+                )
+            })
             .catch((caught: unknown) =>
               setError(
                 caught instanceof Error
@@ -193,8 +229,14 @@ export const TaskConversation = ({
           </button>
         </div>
       </form>
+      {publicationNotice && (
+        <p className="mt-2 text-xs text-[#b9d8ff]" role="status">
+          {publicationNotice}
+        </p>
+      )}
       <p className="mt-4 text-xs text-[#77869a]">
-        Tryb konsultacyjny · tylko odczyt repozytoriów
+        Tryb konsultacyjny · tylko odczyt repozytoriów · aby zapisać ustalenia,
+        napisz np. „ok”, „zatwierdzam”, „zapisz” lub „publikuj”.
       </p>
     </section>
   )
