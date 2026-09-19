@@ -3,6 +3,7 @@ import { ArrowSquareOutIcon, XIcon } from '@phosphor-icons/react'
 import ReactMarkdown from 'react-markdown'
 import type { TaskSummary } from '../../../shared/api/tasks'
 import { TaskConversation } from './TaskConversation'
+import { TaskDraftPanel } from './TaskDraftPanel'
 import { formatDate, providerName } from './workflow-formatters'
 
 type TaskPreviewProps = {
@@ -70,6 +71,7 @@ export const TaskPreview = ({
             Otwórz w {task.provider === 'github' ? 'GitHubie' : 'GitLabie'}
           </a>
         </div>
+        <TaskDraftPanel projectId={projectId} taskId={task.id} task={task} />
         <div className="my-5 space-y-3 text-[13px] leading-[1.65] text-[#b6bab6] [&_code]:rounded [&_code]:bg-[#0e131b] [&_code]:px-1 [&_h1]:text-xl [&_h2]:text-lg [&_li]:ml-5 [&_li]:list-disc">
           <ReactMarkdown>{task.description || 'Brak opisu.'}</ReactMarkdown>
         </div>

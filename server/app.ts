@@ -18,6 +18,10 @@ import {
   verifyRepositoryRequestSchema,
   type VerifyRepositoryRequest,
 } from '../shared/api/repositories.js'
+import {
+  updateTaskDraftRequestSchema,
+  type UpdateTaskDraftRequest,
+} from '../shared/api/task-drafts.js'
 import { readConfig } from './config.js'
 import { CodexAdapter } from './conversations/codex-adapter.js'
 import { ConversationService } from './conversations/conversation-service.js'
@@ -33,6 +37,8 @@ import { ProjectService } from './projects/project-service.js'
 import { ProjectStore } from './projects/project-store.js'
 import { DirectoryService } from './repositories/directory-service.js'
 import { RepositoryService } from './repositories/repository-service.js'
+import { TaskDraftService } from './task-drafts/task-draft-service.js'
+import { TaskDraftStore } from './task-drafts/task-draft-store.js'
 import { TaskService } from './tasks/task-service.js'
 
 type AppVariables = { requestId: string }
@@ -46,6 +52,7 @@ export type AppDependencies = {
   projects?: ProjectService
   tasks?: TaskService
   conversations?: ConversationService
+  taskDrafts?: TaskDraftService
 }
 
 const readJson = async <T>(
@@ -101,6 +108,16 @@ export const createApp = (dependencies: AppDependencies = {}) => {
       projects,
       tasks,
       new CodexAdapter(),
+    )
+  const taskDrafts =
+    dependencies.taskDrafts ??
+    new TaskDraftService(
+      new TaskDraftStore(resolve(config.dataDirectory, 'task-drafts.json')),
+      projects,
+      tasks,
+      conversations,
+      new CodexAdapter(),
+      runner,
     )
 
   app.use('*', async (context, next) => {
@@ -190,6 +207,50 @@ export const createApp = (dependencies: AppDependencies = {}) => {
   app.get('/api/projects/:id/tasks/:taskId/conversation', async (context) =>
     context.json({
       conversation: await conversations.get(
+        context.req.param('id'),
+        context.req.param('taskId'),
+      ),
+    }),
+  )
+
+  app.get('/api/projects/:id/tasks/:taskId/draft', async (context) =>
+    context.json({
+      draft: await taskDrafts.get(
+        context.req.param('id'),
+        context.req.param('taskId'),
+      ),
+    }),
+  )
+
+  app.post('/api/projects/:id/tasks/:taskId/draft/generate', async (context) =>
+    context.json(
+      {
+        draft: await taskDrafts.generate(
+          context.req.param('id'),
+          context.req.param('taskId'),
+        ),
+      },
+      202,
+    ),
+  )
+
+  app.put('/api/projects/:id/tasks/:taskId/draft', async (context) => {
+    const input = await readJson<UpdateTaskDraftRequest>(
+      context.req.raw,
+      updateTaskDraftRequestSchema,
+    )
+    return context.json({
+      draft: await taskDrafts.update(
+        context.req.param('id'),
+        context.req.param('taskId'),
+        input,
+      ),
+    })
+  })
+
+  app.post('/api/projects/:id/tasks/:taskId/draft/publish', async (context) =>
+    context.json({
+      draft: await taskDrafts.publish(
         context.req.param('id'),
         context.req.param('taskId'),
       ),
