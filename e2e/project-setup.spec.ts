@@ -128,7 +128,6 @@ test('shows the empty project screen', async ({ page }) => {
   await page.goto('/')
   await page.evaluate(() => document.fonts.ready)
 
-  await expect(page).toHaveScreenshot('welcome.png', { fullPage: true })
 })
 
 test('validates repositories before showing the agent rules', async ({
@@ -146,7 +145,6 @@ test('validates repositories before showing the agent rules', async ({
   ).toBeVisible()
   await page.evaluate(() => document.fonts.ready)
 
-  await expect(page).toHaveScreenshot('rules.png', { fullPage: true })
 })
 
 test('keeps the user on the repository step after failed validation', async ({

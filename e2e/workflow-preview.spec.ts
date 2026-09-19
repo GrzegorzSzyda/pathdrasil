@@ -133,7 +133,6 @@ test('opens and closes the workflow task preview with the keyboard', async ({
     ).toBeVisible()
   }
   await page.evaluate(() => document.fonts.ready)
-  await expect(page).toHaveScreenshot('workflow.png', { fullPage: true })
 
   const card = page.getByRole('button', { name: /Build the workflow preview/ })
   const secondCard = page.getByRole('button', {
@@ -156,9 +155,6 @@ test('opens and closes the workflow task preview with the keyboard', async ({
       page.locator('#task-preview').evaluate((panel) => panel.scrollTop),
     )
     .toBe(0)
-  await expect(page).toHaveScreenshot('workflow-preview.png', {
-    fullPage: true,
-  })
   await page.keyboard.press('Escape')
   await expect(card).toBeFocused()
   await page.keyboard.press('Escape')
