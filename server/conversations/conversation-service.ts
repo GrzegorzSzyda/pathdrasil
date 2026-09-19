@@ -94,6 +94,7 @@ export class ConversationService {
     let writes = Promise.resolve()
     const run = this.codex.start({
       cwd: project.repositories[0]?.path ?? process.cwd(),
+      sessionId: conversation.agentSessionId,
       prompt: this.prompt(
         project.name,
         task,
@@ -101,6 +102,11 @@ export class ConversationService {
         userContent === undefined,
       ),
       onEvent: (event) => {
+        if (event.type === 'thread-started') {
+          latest = { ...latest, agentSessionId: event.threadId }
+          writes = writes.then(() => this.store.save(latest))
+          return
+        }
         if (event.type !== 'message-completed') return
         latest = {
           ...latest,

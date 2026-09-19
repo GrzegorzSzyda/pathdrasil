@@ -39,6 +39,7 @@ export type CodexRun = {
 type CodexRunInput = {
   prompt: string
   cwd: string
+  sessionId?: string
   onEvent(event: CodexEvent): void
 }
 
@@ -97,10 +98,12 @@ export class CodexAdapter {
         }))
   }
 
-  start({ prompt, cwd, onEvent }: CodexRunInput): CodexRun {
+  start({ prompt, cwd, sessionId, onEvent }: CodexRunInput): CodexRun {
     const process = this.spawnProcess(
       this.command,
-      ['exec', '--json', '--sandbox', 'read-only', '--ephemeral', '-'],
+      sessionId
+        ? ['exec', 'resume', '--json', sessionId, '-']
+        : ['exec', '--json', '--sandbox', 'read-only', '-'],
       cwd,
     )
     let cancelled = false

@@ -27,6 +27,7 @@ export const conversationSchema = z
     projectId: z.string().uuid(),
     taskId: z.string().min(1),
     agentId: z.literal('codex'),
+    agentSessionId: z.string().min(1).optional(),
     status: conversationStatusSchema,
     createdAt: z.string().datetime(),
     updatedAt: z.string().datetime(),
