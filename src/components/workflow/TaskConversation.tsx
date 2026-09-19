@@ -13,12 +13,14 @@ type TaskConversationProps = {
   projectId: string
   taskId: string
   onClose: () => void
+  onTaskPublished: () => void
 }
 
 export const TaskConversation = ({
   projectId,
   taskId,
   onClose,
+  onTaskPublished,
 }: TaskConversationProps) => {
   const [conversation, setConversation] = useState<Conversation | null>(null)
   const [error, setError] = useState('')
@@ -76,6 +78,7 @@ export const TaskConversation = ({
             )
           else if (draft?.publishedAt)
             setPublicationNotice('Zaakceptowane ustalenia zapisano w GitHubie.')
+          if (draft?.publishedAt) onTaskPublished()
         })
         .catch(() =>
           setPublicationNotice('Nie udało się sprawdzić zapisu draftu.'),
@@ -83,7 +86,7 @@ export const TaskConversation = ({
     void poll()
     const timer = window.setInterval(() => void poll(), 1_000)
     return () => window.clearInterval(timer)
-  }, [draftBase, publicationNotice])
+  }, [draftBase, onTaskPublished, publicationNotice])
 
   return (
     <section
@@ -165,18 +168,18 @@ export const TaskConversation = ({
           event.preventDefault()
           const content = draft.trim()
           if (!content || conversation?.status === 'responding') return
-          const publishesDraft =
-            /(^|[^\p{L}])akcept(?:uję|uje|ujemy|uj(?:ę|emy)?|owano)(?=$|[^\p{L}])/iu.test(
-              content,
-            )
           setDraft('')
-          if (publishesDraft)
-            setPublicationNotice('Przygotowuję i zapisuję zaakceptowany draft…')
           void requestJson(`${base}/messages`, conversationResponseSchema, {
             method: 'POST',
             body: JSON.stringify({ content }),
           })
-            .then((response) => setConversation(response.conversation))
+            .then((response) => {
+              setConversation(response.conversation)
+              if (response.publicationRequested)
+                setPublicationNotice(
+                  'Przygotowuję i zapisuję zaakceptowany draft…',
+                )
+            })
             .catch((caught: unknown) =>
               setError(
                 caught instanceof Error
@@ -233,7 +236,7 @@ export const TaskConversation = ({
       )}
       <p className="mt-4 text-xs text-[#77869a]">
         Tryb konsultacyjny · tylko odczyt repozytoriów · aby zapisać ustalenia,
-        napisz „Akceptuję”.
+        napisz np. „ok”, „zatwierdzam”, „zapisz” lub „publikuj”.
       </p>
     </section>
   )

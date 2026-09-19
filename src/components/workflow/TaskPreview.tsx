@@ -13,6 +13,7 @@ type TaskPreviewProps = {
   conversationOpen: boolean
   onOpenConversation: () => void
   onCloseConversation: () => void
+  onTaskPublished: () => void
 }
 
 export const TaskPreview = ({
@@ -23,6 +24,7 @@ export const TaskPreview = ({
   conversationOpen,
   onOpenConversation,
   onCloseConversation,
+  onTaskPublished,
 }: TaskPreviewProps): React.JSX.Element => {
   return (
     <div
@@ -107,6 +109,7 @@ export const TaskPreview = ({
           projectId={projectId}
           taskId={task.id}
           onClose={onCloseConversation}
+          onTaskPublished={onTaskPublished}
         />
       )}
     </div>

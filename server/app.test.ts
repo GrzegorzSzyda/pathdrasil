@@ -73,9 +73,14 @@ describe('HTTP app', () => {
 })
 
 describe('isApprovalAndPublicationMessage', () => {
-  it('recognizes an explicit approval written in Polish', () => {
+  it('recognizes natural Polish approval and publication instructions', () => {
     expect(isApprovalAndPublicationMessage('Akceptuję.')).toBe(true)
     expect(isApprovalAndPublicationMessage('Akceptujemy ten plan.')).toBe(true)
-    expect(isApprovalAndPublicationMessage('Zapisz notatkę.')).toBe(false)
+    expect(isApprovalAndPublicationMessage('Zapisz to.')).toBe(true)
+    expect(isApprovalAndPublicationMessage('Publikuj.')).toBe(true)
+    expect(isApprovalAndPublicationMessage('OK')).toBe(true)
+    expect(
+      isApprovalAndPublicationMessage('Potrzebuję więcej informacji.'),
+    ).toBe(false)
   })
 })

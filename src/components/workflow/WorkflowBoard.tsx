@@ -10,6 +10,7 @@ type WorkflowBoardProps = {
   onSelectTask: (task: TaskSummary) => void
   onClosePreview: () => void
   projectId: string
+  onTaskPublished: () => void
 }
 
 export const WorkflowBoard = ({
@@ -18,6 +19,7 @@ export const WorkflowBoard = ({
   onSelectTask,
   onClosePreview,
   projectId,
+  onTaskPublished,
 }: WorkflowBoardProps): React.JSX.Element => {
   const todoTasks = tasksForColumn(tasks, 'todo')
   const selectedTask = selectedTaskFrom(todoTasks, selectedTaskId)
@@ -59,6 +61,7 @@ export const WorkflowBoard = ({
               onClosePreview={navigation.closePreview}
               dimmed={selectedTask !== null && column.id !== 'todo'}
               projectId={projectId}
+              onTaskPublished={onTaskPublished}
             />
           ))}
         </div>
