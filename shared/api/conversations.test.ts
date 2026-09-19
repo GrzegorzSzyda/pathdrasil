@@ -43,6 +43,15 @@ describe('conversationSchema', () => {
     expect(parsed.messages[0]?.status).toBe('cancelled')
   })
 
+  it('persists the Codex session used to resume a conversation', () => {
+    expect(
+      conversationSchema.parse({
+        ...conversation,
+        agentSessionId: '01a0b6ac-45ae-7233-993f-cdf4c7680042',
+      }).agentSessionId,
+    ).toBe('01a0b6ac-45ae-7233-993f-cdf4c7680042')
+  })
+
   it('rejects messages belonging to another conversation', () => {
     expect(
       conversationSchema.safeParse({
