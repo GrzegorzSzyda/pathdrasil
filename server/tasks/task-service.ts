@@ -72,6 +72,10 @@ export class TaskService {
     return tasks
   }
 
+  invalidate(projectId: string): void {
+    this.cache.delete(projectId)
+  }
+
   private async listGitHub(
     sourceId: string,
     repository: string,

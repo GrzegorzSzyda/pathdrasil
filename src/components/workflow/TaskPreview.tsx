@@ -13,6 +13,7 @@ type TaskPreviewProps = {
   conversationOpen: boolean
   onOpenConversation: () => void
   onCloseConversation: () => void
+  onTaskPublished: () => void | Promise<void>
 }
 
 export const TaskPreview = ({
@@ -23,14 +24,15 @@ export const TaskPreview = ({
   conversationOpen,
   onOpenConversation,
   onCloseConversation,
+  onTaskPublished,
 }: TaskPreviewProps): React.JSX.Element => {
   return (
     <div
-      className={`absolute top-14 bottom-0 flex min-w-[418px] overflow-hidden rounded-tl-[22px] bg-[#141922] max-[760px]:top-[52px] ${conversationOpen ? 'left-[302px] w-[838px]' : 'right-0 w-[58%]'}`}
+      className={`absolute top-14 bottom-0 flex overflow-hidden rounded-tl-[22px] bg-[#141922] max-[760px]:top-[52px] ${conversationOpen ? 'left-[360px] w-[1080px]' : 'left-[360px] w-[560px]'}`}
     >
       <aside
         id="task-preview"
-        className={`relative min-w-[340px] [scrollbar-width:thin] [scrollbar-color:#334155_transparent] overflow-x-hidden overflow-y-auto p-7 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#334155] [&::-webkit-scrollbar-thumb:hover]:bg-[#4b6079] ${conversationOpen ? 'w-[418px] flex-none' : 'flex-1'}`}
+        className="relative w-[560px] flex-none [scrollbar-width:thin] [scrollbar-color:#334155_transparent] overflow-x-hidden overflow-y-auto p-7 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#334155] [&::-webkit-scrollbar-thumb:hover]:bg-[#4b6079]"
         aria-labelledby="task-preview-heading"
       >
         <button
@@ -107,6 +109,7 @@ export const TaskPreview = ({
           projectId={projectId}
           taskId={task.id}
           onClose={onCloseConversation}
+          onTaskPublished={onTaskPublished}
         />
       )}
     </div>

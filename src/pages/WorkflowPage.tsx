@@ -1,3 +1,4 @@
+import { useCallback } from 'react'
 import { ArrowClockwiseIcon } from '@phosphor-icons/react'
 import { useParams } from 'react-router-dom'
 import { Button } from '../components/Button'
@@ -22,6 +23,9 @@ export const WorkflowPage = (): React.JSX.Element => {
     tasks,
     workflowHeadingRef,
   } = useWorkflowPage(id)
+  const refreshAfterPublication = useCallback(async () => {
+    await loadTasks(true)
+  }, [loadTasks])
 
   return (
     <main className="text-text h-screen overflow-hidden bg-[#171c24] font-['Manrope']">
@@ -83,6 +87,7 @@ export const WorkflowPage = (): React.JSX.Element => {
               onSelectTask={selectTask}
               onClosePreview={closePreview}
               projectId={id}
+              onTaskPublished={refreshAfterPublication}
             />
             <p className="sr-only" aria-live="polite">
               {selectedTaskId
