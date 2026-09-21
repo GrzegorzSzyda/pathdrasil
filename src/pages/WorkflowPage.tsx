@@ -23,10 +23,9 @@ export const WorkflowPage = (): React.JSX.Element => {
     tasks,
     workflowHeadingRef,
   } = useWorkflowPage(id)
-  const refreshAfterPublication = useCallback(
-    () => void loadTasks(true),
-    [loadTasks],
-  )
+  const refreshAfterPublication = useCallback(async () => {
+    await loadTasks(true)
+  }, [loadTasks])
 
   return (
     <main className="text-text h-screen overflow-hidden bg-[#171c24] font-['Manrope']">

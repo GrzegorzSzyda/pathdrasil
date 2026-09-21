@@ -79,11 +79,6 @@ const isLocalOrigin = (origin: string): boolean => {
   }
 }
 
-export const isApprovalAndPublicationMessage = (content: string): boolean =>
-  /(^|[^\p{L}])(akcept(?:uję|uje|ujemy|uj(?:ę|emy)?|owano)|zatwierdz\w*|zgadzam\s+się|zapis\w*|publikuj\w*|opublikuj\w*|zaktualizuj\w*)(?=$|[^\p{L}])/iu.test(
-    content,
-  ) || /^(ok|okej|tak|jasne|dobra|dawaj)[!.\s]*$/iu.test(content)
-
 export const createApp = (dependencies: AppDependencies = {}) => {
   const app = new Hono<{ Variables: AppVariables }>()
   const logger = dependencies.logger ?? createLogger('info')
@@ -263,6 +258,20 @@ export const createApp = (dependencies: AppDependencies = {}) => {
   )
 
   app.post(
+    '/api/projects/:id/tasks/:taskId/draft/generate-and-publish',
+    async (context) =>
+      context.json(
+        {
+          draft: await taskDrafts.generateAndPublish(
+            context.req.param('id'),
+            context.req.param('taskId'),
+          ),
+        },
+        202,
+      ),
+  )
+
+  app.post(
     '/api/projects/:id/tasks/:taskId/conversation/start',
     async (context) =>
       context.json(
@@ -290,12 +299,7 @@ export const createApp = (dependencies: AppDependencies = {}) => {
         taskId,
         input.content,
       )
-      const publicationRequested = isApprovalAndPublicationMessage(
-        input.content,
-      )
-      if (publicationRequested)
-        await taskDrafts.generateAndPublish(projectId, taskId)
-      return context.json({ conversation, publicationRequested }, 202)
+      return context.json({ conversation }, 202)
     },
   )
 

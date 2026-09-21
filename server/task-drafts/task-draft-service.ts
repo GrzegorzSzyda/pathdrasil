@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto'
+import { z } from 'zod'
 import {
   taskDraftContentSchema,
   type TaskDraft,
@@ -52,6 +53,7 @@ export class TaskDraftService {
       conversationId: conversation.id,
       title: existing?.title ?? task.title,
       description: existing?.description ?? task.description,
+      operation: existing?.operation ?? 'update',
       acceptanceCriteria: existing?.acceptanceCriteria ?? [],
       plan: existing?.plan ?? [],
       dependencies: existing?.dependencies ?? [],
@@ -101,6 +103,8 @@ export class TaskDraftService {
         latest = {
           ...draft,
           ...content,
+          operation: content.operation ?? 'update',
+          deleteTaskTitles: content.deleteTaskTitles ?? [],
           generationStatus: 'idle',
           updatedAt: completedAt,
         }
@@ -180,27 +184,47 @@ export class TaskDraftService {
         'Publikacja draftów jest obecnie dostępna tylko dla GitHub Issues.',
         501,
       )
-    const result = await this.runner.run({
-      command: 'gh',
-      args: [
-        'issue',
-        'edit',
-        String(task.externalId),
-        '--repo',
-        task.repository,
-        '--title',
-        draft.title,
-        '--body',
-        this.githubBody(draft),
-      ],
-      timeoutMs: 20_000,
-    })
+    const result = await this.runner.run(
+      draft.operation === 'create'
+        ? {
+            command: 'gh',
+            args: [
+              'issue',
+              'create',
+              '--repo',
+              task.repository,
+              '--assignee',
+              '@me',
+              '--title',
+              draft.title,
+              '--body',
+              this.githubBody(draft),
+            ],
+            timeoutMs: 20_000,
+          }
+        : {
+            command: 'gh',
+            args: [
+              'issue',
+              'edit',
+              String(task.externalId),
+              '--repo',
+              task.repository,
+              '--title',
+              draft.title,
+              '--body',
+              this.githubBody(draft),
+            ],
+            timeoutMs: 20_000,
+          },
+    )
     if (!result.ok)
       throw new AppError(
         'TASK_DRAFT_PUBLISH_FAILED',
         'Nie udało się opublikować draftu w GitHubie.',
         502,
       )
+    await this.deleteTasksByTitle(task, draft.deleteTaskTitles ?? [])
     const updated = {
       ...draft,
       publishedAt: new Date().toISOString(),
@@ -233,7 +257,92 @@ export class TaskDraftService {
     task: TaskSummary,
     messages: Array<{ role: string; content: string }>,
   ): string {
-    return `Jesteś analitykiem technicznym w projekcie ${projectName}. Pracujesz wyłącznie w trybie odczytu. Na podstawie taska i rozmowy przygotuj praktyczny draft opracowania. Nie modyfikuj plików, issue, commitów, branchy ani PR/MR. Zwróć WYŁĄCZNIE poprawny JSON bez Markdownu o dokładnej strukturze: {"title": string, "description": string, "acceptanceCriteria": string[], "plan": string[], "dependencies": string[], "questions": string[]}. Odpowiadaj po polsku. Jeżeli czegoś nie wiadomo, dodaj to do questions, nie wymyślaj faktów.\n\nTask #${task.externalId}: ${task.title}\nOpis:\n${task.description || 'Brak opisu.'}\n\nRozmowa:\n${messages.map((message) => `${message.role}: ${message.content}`).join('\n') || 'Brak rozmowy.'}`
+    return `Jesteś analitykiem technicznym w projekcie ${projectName}. Pracujesz wyłącznie w trybie odczytu. Na podstawie taska i rozmowy przygotuj praktyczny draft opracowania. Nie modyfikuj plików, issue, commitów, branchy ani PR/MR. Zwróć WYŁĄCZNIE poprawny JSON bez Markdownu o dokładnej strukturze: {"operation": "update" | "create", "deleteTaskTitles": string[], "title": string, "description": string, "acceptanceCriteria": string[], "plan": string[], "dependencies": string[], "questions": string[]}. Odpowiadaj po polsku. Jeżeli czegoś nie wiadomo, dodaj to do questions, nie wymyślaj faktów.
+
+Najważniejsza reguła: najnowsza jednoznaczna dyspozycja użytkownika dotycząca tytułu, opisu lub zakresu ma pierwszeństwo przed całą starszą rozmową, wcześniejszymi draftami i odpowiedziami asystenta. Zastosuj ją literalnie, w tym wskazaną wielkość liter w tytule. Nie przedstawiaj takiej dyspozycji jako otwartego pytania ani nie zastępujaj jej podsumowaniem historii. Starsze ustalenia zachowaj wyłącznie, gdy nie są z nią sprzeczne. Treść asystenta jest propozycją, a nie poleceniem nadrzędnym.
+
+Ustaw operation na "create" wyłącznie wtedy, gdy najnowsza jednoznaczna dyspozycja użytkownika prosi o utworzenie nowego taska lub issue. Wtedy tytuł i opis dotyczą nowego issue, które powstanie w repozytorium bieżącego taska. W każdym innym przypadku ustaw operation na "update" i zaktualizuj bieżące issue.
+
+Jeśli użytkownik jednoznacznie zleca usunięcie innych tasków, wpisz ich dokładne tytuły do deleteTaskTitles. Usuwaj tylko taski wskazane konkretnym tytułem w rozmowie, z bieżącego repozytorium; nie usuwaj bieżącego issue. Jeżeli zakres usunięcia jest niejednoznaczny, ustaw deleteTaskTitles na [] i poproś o doprecyzowanie. Gdy nic nie ma być usunięte, zwróć deleteTaskTitles jako [].
+
+Task #${task.externalId}: ${task.title}
+Opis:
+${task.description || 'Brak opisu.'}
+
+Najnowsze wiadomości użytkownika (nadrzędne):
+${
+  messages
+    .filter((message) => message.role === 'user')
+    .slice(-3)
+    .map((message) => message.content)
+    .join('\n') || 'Brak rozmowy.'
+}
+
+Pełna rozmowa:
+${messages.map((message) => `${message.role}: ${message.content}`).join('\n') || 'Brak rozmowy.'}`
+  }
+
+  private async deleteTasksByTitle(
+    task: TaskSummary,
+    titles: string[],
+  ): Promise<void> {
+    for (const title of [...new Set(titles.map((value) => value.trim()))]) {
+      if (!title) continue
+      const listed = await this.runner.run({
+        command: 'gh',
+        args: [
+          'issue',
+          'list',
+          '--repo',
+          task.repository,
+          '--state',
+          'open',
+          '--limit',
+          '100',
+          '--search',
+          `${title} in:title`,
+          '--json',
+          'number,title',
+        ],
+        timeoutMs: 20_000,
+      })
+      if (!listed.ok)
+        throw new AppError(
+          'TASK_DRAFT_DELETE_LIST_FAILED',
+          'Nie udało się znaleźć taska do usunięcia w GitHubie.',
+          502,
+        )
+      const matches = z
+        .array(
+          z.object({ number: z.number().int().positive(), title: z.string() }),
+        )
+        .parse(JSON.parse(listed.stdout))
+        .filter(
+          (item) =>
+            item.number !== task.externalId &&
+            item.title.trim().toLocaleLowerCase() === title.toLocaleLowerCase(),
+        )
+      for (const match of matches) {
+        const deleted = await this.runner.run({
+          command: 'gh',
+          args: [
+            'issue',
+            'delete',
+            String(match.number),
+            '--repo',
+            task.repository,
+            '--yes',
+          ],
+          timeoutMs: 20_000,
+        })
+        if (!deleted.ok)
+          throw new AppError(
+            'TASK_DRAFT_DELETE_FAILED',
+            'Nie udało się usunąć taska w GitHubie.',
+            502,
+          )
+      }
+    }
   }
 
   private githubBody(draft: TaskDraft): string {

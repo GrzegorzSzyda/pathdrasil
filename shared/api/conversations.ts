@@ -46,7 +46,6 @@ export const conversationSchema = z
 
 export const conversationResponseSchema = z.object({
   conversation: conversationSchema,
-  publicationRequested: z.boolean().optional(),
 })
 
 export const createConversationMessageRequestSchema = z.object({

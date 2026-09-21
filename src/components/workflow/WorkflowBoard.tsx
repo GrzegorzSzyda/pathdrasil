@@ -10,7 +10,7 @@ type WorkflowBoardProps = {
   onSelectTask: (task: TaskSummary) => void
   onClosePreview: () => void
   projectId: string
-  onTaskPublished: () => void
+  onTaskPublished: () => void | Promise<void>
 }
 
 export const WorkflowBoard = ({

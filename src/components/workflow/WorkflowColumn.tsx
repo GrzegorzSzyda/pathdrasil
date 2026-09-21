@@ -17,7 +17,7 @@ type WorkflowColumnProps = {
   onClosePreview: () => void
   dimmed: boolean
   projectId: string
-  onTaskPublished: () => void
+  onTaskPublished: () => void | Promise<void>
 }
 
 export const WorkflowColumn = ({
@@ -42,11 +42,15 @@ export const WorkflowColumn = ({
     <section
       aria-labelledby={`workflow-column-${column.id}`}
       className={cn(
-        'relative z-[1] flex min-w-[180px] flex-[1_1_20%] flex-col bg-[#171c24] transition-[flex-basis,min-width,opacity,filter,box-shadow] duration-[320ms] ease-[cubic-bezier(0.2,0.8,0.2,1)] motion-reduce:transition-none',
+        'relative z-[1] flex flex-col bg-[#171c24] transition-[flex-basis,min-width,opacity,filter,box-shadow] duration-[320ms] ease-[cubic-bezier(0.2,0.8,0.2,1)] motion-reduce:transition-none',
+        column.id === 'todo'
+          ? 'min-w-[360px] flex-[0_0_360px]'
+          : 'min-w-[180px] flex-[1_1_20%]',
         dimmed && 'basis-[14%] opacity-[0.48] saturate-[0.45]',
         taskOpen &&
-          'z-[3] min-w-[720px] basis-[58%] bg-[#181e27] shadow-[-18px_0_38px_#0d1117c2,18px_0_38px_#0d1117c2]',
-        taskOpen && conversationOpen && 'min-w-[1140px] flex-[0_0_1140px]',
+          (conversationOpen
+            ? 'z-[3] min-w-[1440px] flex-[0_0_1440px] bg-[#181e27] shadow-[-18px_0_38px_#0d1117c2,18px_0_38px_#0d1117c2]'
+            : 'z-[3] min-w-[920px] flex-[0_0_920px] bg-[#181e27] shadow-[-18px_0_38px_#0d1117c2,18px_0_38px_#0d1117c2]'),
       )}
     >
       <header className="relative flex h-14 flex-[0_0_56px] items-center gap-2 overflow-hidden px-5 py-3 max-[760px]:h-[52px] max-[760px]:flex-[0_0_52px] max-[760px]:px-3.5 max-[760px]:py-2.5">
@@ -68,8 +72,8 @@ export const WorkflowColumn = ({
       </header>
       <ul
         className={cn(
-          'm-0 min-h-0 w-full flex-1 [scrollbar-width:thin] [scrollbar-color:#3a3d3b_transparent] list-none overflow-y-auto p-3 [&>li]:mb-2.5',
-          taskOpen && (conversationOpen ? 'w-[302px] flex-none' : 'w-[42%]'),
+          'm-0 min-h-0 [scrollbar-width:thin] [scrollbar-color:#334155_transparent] list-none overflow-y-auto p-3 [&>li]:mb-2.5',
+          column.id === 'todo' ? 'w-[360px] flex-1' : 'w-full flex-1',
         )}
         aria-label={`Taski: ${column.title}`}
       >
@@ -83,7 +87,10 @@ export const WorkflowColumn = ({
                   index === Math.min(activeIndex, tasks.length - 1) ? 0 : -1
                 }
                 selected={task.id === selectedTask?.id}
-                onClick={(button) => onSelectTask(task, button)}
+                onClick={(button) => {
+                  setConversationOpen(false)
+                  onSelectTask(task, button)
+                }}
                 onNavigate={(offset) => onFocusCard(index + offset)}
                 onSetFirst={() => onFocusCard(0)}
                 onSetLast={() => onFocusCard(tasks.length - 1)}
@@ -98,7 +105,7 @@ export const WorkflowColumn = ({
         <p
           className={cn(
             'm-3 grid min-h-[72px] place-items-center rounded-lg bg-[#191f28] text-[11px] text-[#4d596b]',
-            taskOpen && (conversationOpen ? 'w-[302px]' : 'w-[42%]'),
+            column.id === 'todo' ? 'w-[336px]' : 'w-full',
           )}
         >
           Brak tasków na tym etapie
@@ -108,7 +115,10 @@ export const WorkflowColumn = ({
         <TaskPreview
           task={selectedTask}
           headingRef={previewHeadingRef}
-          onClose={onClosePreview}
+          onClose={() => {
+            setConversationOpen(false)
+            onClosePreview()
+          }}
           projectId={projectId}
           conversationOpen={conversationOpen}
           onOpenConversation={() => setConversationOpen(true)}

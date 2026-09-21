@@ -40,4 +40,22 @@
   button {
     font: inherit;
   }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #334155 transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 0.5rem;
+    height: 0.5rem;
+  }
+  *::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 9999px;
+  }
+  *::-webkit-scrollbar-thumb:hover {
+    background: #4b6079;
+  }
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
 }

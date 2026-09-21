@@ -1,5 +1,14 @@
-import { useEffect, useState } from 'react'
-import { CornersInIcon, CornersOutIcon, XIcon } from '@phosphor-icons/react'
+import { useEffect, useRef, useState } from 'react'
+import {
+  CornersInIcon,
+  CornersOutIcon,
+  CheckCircleIcon,
+  PaperPlaneTiltIcon,
+  SpinnerGapIcon,
+  StopIcon,
+  WarningCircleIcon,
+  XIcon,
+} from '@phosphor-icons/react'
 import ReactMarkdown from 'react-markdown'
 import {
   conversationResponseSchema,
@@ -13,7 +22,7 @@ type TaskConversationProps = {
   projectId: string
   taskId: string
   onClose: () => void
-  onTaskPublished: () => void
+  onTaskPublished: () => void | Promise<void>
 }
 
 export const TaskConversation = ({
@@ -27,6 +36,10 @@ export const TaskConversation = ({
   const [draft, setDraft] = useState('')
   const [fullscreen, setFullscreen] = useState(false)
   const [publicationNotice, setPublicationNotice] = useState('')
+  const conversationEndRef = useRef<HTMLDivElement>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const publicationMessageIdRef = useRef<string | null>(null)
+  const responding = conversation?.status === 'responding'
   const base = `/api/projects/${encodeURIComponent(projectId)}/tasks/${encodeURIComponent(taskId)}/conversation`
   const draftBase = `/api/projects/${encodeURIComponent(projectId)}/tasks/${encodeURIComponent(taskId)}/draft`
 
@@ -57,18 +70,46 @@ export const TaskConversation = ({
     })
     const events = new EventSource(`${base}/events`)
     const refresh = () => void load()
+    const publishAfterCompletion = () => {
+      void requestJson(base, conversationResponseSchema).then(
+        ({ conversation }) => {
+          const lastMessage = conversation.messages.at(-1)
+          const previousMessage = conversation.messages.at(-2)
+          if (
+            lastMessage?.role !== 'assistant' ||
+            previousMessage?.role !== 'user' ||
+            publicationMessageIdRef.current === lastMessage.id
+          )
+            return
+          publicationMessageIdRef.current = lastMessage.id
+          setPublicationNotice('Przygotowuję i zapisuję ustalenia…')
+          void requestJson(
+            `${draftBase}/generate-and-publish`,
+            taskDraftResponseSchema,
+            { method: 'POST' },
+          ).catch((caught: unknown) =>
+            setPublicationNotice(
+              caught instanceof Error
+                ? `Nie udało się zapisać: ${caught.message}`
+                : 'Nie udało się rozpocząć zapisu draftu.',
+            ),
+          )
+        },
+        () => setPublicationNotice('Nie udało się przygotować publikacji.'),
+      )
+    }
     events.addEventListener('complete', refresh)
+    events.addEventListener('complete', publishAfterCompletion)
     events.addEventListener('cancelled', refresh)
     events.addEventListener('error', refresh)
     return () => {
       active = false
       events.close()
     }
-  }, [base])
+  }, [base, draftBase])
 
   useEffect(() => {
-    if (publicationNotice !== 'Przygotowuję i zapisuję zaakceptowany draft…')
-      return
+    if (publicationNotice !== 'Przygotowuję i zapisuję ustalenia…') return
     const poll = () =>
       requestJson(draftBase, taskDraftResponseSchema)
         .then(({ draft }) => {
@@ -76,9 +117,19 @@ export const TaskConversation = ({
             setPublicationNotice(
               `Nie udało się zapisać: ${draft.generationError || 'spróbuj ponownie.'}`,
             )
-          else if (draft?.publishedAt)
-            setPublicationNotice('Zaakceptowane ustalenia zapisano w GitHubie.')
-          if (draft?.publishedAt) onTaskPublished()
+          else if (draft?.publishedAt) {
+            setPublicationNotice('Odświeżam zaktualizowany task…')
+            void Promise.resolve(onTaskPublished()).then(
+              () =>
+                setPublicationNotice(
+                  draft.operation === 'create' ? 'Utworzono.' : 'Zapisano.',
+                ),
+              () =>
+                setPublicationNotice(
+                  'Ustalenia zapisano w GitHubie, ale nie udało się odświeżyć taska.',
+                ),
+            )
+          }
         })
         .catch(() =>
           setPublicationNotice('Nie udało się sprawdzić zapisu draftu.'),
@@ -88,9 +139,16 @@ export const TaskConversation = ({
     return () => window.clearInterval(timer)
   }, [draftBase, onTaskPublished, publicationNotice])
 
+  useEffect(() => {
+    conversationEndRef.current?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'end',
+    })
+  }, [conversation, publicationNotice])
+
   return (
     <section
-      className={`flex min-w-[320px] flex-1 flex-col border-l border-[#293342] bg-[#111720] p-5 ${fullscreen ? 'fixed top-[72px] right-0 bottom-0 left-0 z-50 border-0' : ''}`}
+      className={`flex w-[520px] flex-none flex-col border-l border-[#293342] bg-[#111720] p-5 ${fullscreen ? 'fixed top-[72px] right-0 bottom-0 left-0 z-50 !w-auto border-0' : ''}`}
       aria-label="Rozmowa o tasku"
     >
       {fullscreen && (
@@ -161,25 +219,23 @@ export const TaskConversation = ({
             )}
           </article>
         ))}
+        {publicationNotice && <PublicationStatus message={publicationNotice} />}
+        <div ref={conversationEndRef} />
       </div>
       <form
+        id="task-conversation-form"
         className="mt-4"
         onSubmit={(event) => {
           event.preventDefault()
           const content = draft.trim()
           if (!content || conversation?.status === 'responding') return
           setDraft('')
+          requestAnimationFrame(() => textareaRef.current?.focus())
           void requestJson(`${base}/messages`, conversationResponseSchema, {
             method: 'POST',
             body: JSON.stringify({ content }),
           })
-            .then((response) => {
-              setConversation(response.conversation)
-              if (response.publicationRequested)
-                setPublicationNotice(
-                  'Przygotowuję i zapisuję zaakceptowany draft…',
-                )
-            })
+            .then((response) => setConversation(response.conversation))
             .catch((caught: unknown) =>
               setError(
                 caught instanceof Error
@@ -189,24 +245,25 @@ export const TaskConversation = ({
             )
         }}
       >
-        <textarea
-          className="min-h-20 w-full resize-y rounded-lg border border-[#334155] bg-[#171f2a] p-3 text-sm text-[#e6edf5] placeholder:text-[#718096] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#758399]"
-          value={draft}
-          onChange={(event) => setDraft(event.target.value)}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter' && !event.shiftKey) {
-              event.preventDefault()
-              event.currentTarget.form?.requestSubmit()
-            }
-          }}
-          placeholder="Napisz wiadomość…"
-          disabled={conversation?.status === 'responding'}
-        />
-        <div className="mt-2 flex justify-end gap-2">
-          {conversation?.status === 'responding' && (
+        <div className="flex items-start gap-2">
+          <textarea
+            ref={textareaRef}
+            className="min-h-20 min-w-0 flex-1 resize-y rounded-lg border border-[#334155] bg-[#171f2a] p-3 text-sm text-[#e6edf5] placeholder:text-[#718096] read-only:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#758399]"
+            value={draft}
+            onChange={(event) => setDraft(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault()
+                event.currentTarget.form?.requestSubmit()
+              }
+            }}
+            placeholder="Napisz wiadomość…"
+            readOnly={responding}
+          />
+          {responding ? (
             <button
               type="button"
-              className="min-h-9 rounded-md border border-[#6e4852] px-3 text-xs text-[#f2b8c0] hover:bg-[#43242b]"
+              className="grid size-10 shrink-0 place-items-center rounded-md border border-[#354254] text-[#aab4c3] hover:bg-[#283342] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#758399]"
               onClick={() => {
                 void fetch(`${base}/cancel`, { method: 'POST' }).then(
                   (response) => {
@@ -216,28 +273,22 @@ export const TaskConversation = ({
                   () => setError('Nie udało się zatrzymać odpowiedzi.'),
                 )
               }}
+              aria-label="Zatrzymaj odpowiedź"
             >
-              Zatrzymaj
+              <StopIcon aria-hidden="true" size={18} weight="fill" />
+            </button>
+          ) : (
+            <button
+              type="submit"
+              className="grid size-10 shrink-0 place-items-center rounded-md bg-[#365d89] text-white hover:bg-[#4774a6] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#758399] disabled:opacity-50"
+              disabled={!draft.trim()}
+              aria-label="Wyślij wiadomość"
+            >
+              <PaperPlaneTiltIcon aria-hidden="true" size={18} weight="fill" />
             </button>
           )}
-          <button
-            type="submit"
-            className="min-h-9 rounded-md bg-[#365d89] px-3 text-xs font-semibold text-white hover:bg-[#4774a6] disabled:opacity-50"
-            disabled={!draft.trim() || conversation?.status === 'responding'}
-          >
-            Wyślij
-          </button>
         </div>
       </form>
-      {publicationNotice && (
-        <p className="mt-2 text-xs text-[#b9d8ff]" role="status">
-          {publicationNotice}
-        </p>
-      )}
-      <p className="mt-4 text-xs text-[#77869a]">
-        Tryb konsultacyjny · tylko odczyt repozytoriów · aby zapisać ustalenia,
-        napisz np. „ok”, „zatwierdzam”, „zapisz” lub „publikuj”.
-      </p>
     </section>
   )
 }
@@ -249,3 +300,27 @@ const TypingIndicator = () => (
     <i className="size-1.5 animate-bounce rounded-full bg-[#9fb0c4]" />
   </span>
 )
+
+const PublicationStatus = ({ message }: { message: string }) => {
+  const failed = message.startsWith('Nie udało')
+  const complete = message === 'Zapisano.' || message === 'Utworzono.'
+  const Icon = failed
+    ? WarningCircleIcon
+    : complete
+      ? CheckCircleIcon
+      : SpinnerGapIcon
+
+  return (
+    <p
+      className={`mr-6 flex items-center gap-2 text-xs ${failed ? 'text-[#f2b8c0]' : complete ? 'text-[#a8dcb7]' : 'text-[#b9d8ff]'}`}
+      role="status"
+    >
+      <Icon
+        aria-hidden="true"
+        className={complete || failed ? '' : 'animate-spin'}
+        size={16}
+      />
+      {message}
+    </p>
+  )
+}

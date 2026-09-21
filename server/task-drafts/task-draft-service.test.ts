@@ -101,4 +101,91 @@ describe('TaskDraftService.publish', () => {
     })
     expect(runner.run).not.toHaveBeenCalled()
   })
+
+  it('creates a new GitHub issue when the draft targets a new task', async () => {
+    const { service, runner, tasks } = createService({
+      ...draft,
+      operation: 'create',
+    })
+
+    await service.publish(projectId, taskId)
+
+    expect(runner.run).toHaveBeenCalledWith({
+      command: 'gh',
+      args: [
+        'issue',
+        'create',
+        '--repo',
+        'octocat/pathdrasil',
+        '--assignee',
+        '@me',
+        '--title',
+        'Nowy tytuł',
+        '--body',
+        'Nowy opis\n\n## Kryteria akceptacji\n- Da się zapisać draft.\n\n## Plan\n- Dodać endpoint.\n\n## Otwarte pytania\n- Czy wdrażać teraz?',
+      ],
+      timeoutMs: 20_000,
+    })
+    expect(tasks.invalidate).toHaveBeenCalledWith(projectId)
+  })
+
+  it('deletes other tasks explicitly named in the draft', async () => {
+    const { service, runner } = createService({
+      ...draft,
+      deleteTaskTitles: ['Test Subissue'],
+    })
+    runner.run
+      .mockResolvedValueOnce({
+        ok: true,
+        stdout: '',
+        stderr: '',
+        timedOut: false,
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        stdout: JSON.stringify([{ number: 12, title: 'Test Subissue' }]),
+        stderr: '',
+        timedOut: false,
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        stdout: '',
+        stderr: '',
+        timedOut: false,
+      })
+
+    await service.publish(projectId, taskId)
+
+    expect(runner.run).toHaveBeenLastCalledWith({
+      command: 'gh',
+      args: ['issue', 'delete', '12', '--repo', 'octocat/pathdrasil', '--yes'],
+      timeoutMs: 20_000,
+    })
+  })
+})
+
+describe('TaskDraftService generation prompt', () => {
+  it('makes the latest explicit user instruction authoritative', () => {
+    const { service } = createService()
+    const prompt = (
+      service as unknown as {
+        generationPrompt: (
+          projectName: string,
+          task: TaskSummary,
+          messages: Array<{ role: string; content: string }>,
+        ) => string
+      }
+    ).generationPrompt('Pathdrasil', task, [
+      { role: 'user', content: 'Zostaw stary tytuł.' },
+      { role: 'assistant', content: 'Proponuję dłuższy opis.' },
+      { role: 'user', content: 'Zmień tytuł na Test issue.' },
+    ])
+
+    expect(prompt).toContain(
+      'najnowsza jednoznaczna dyspozycja użytkownika dotycząca tytułu',
+    )
+    expect(prompt).toContain(
+      'Najnowsze wiadomości użytkownika (nadrzędne):\nZostaw stary tytuł.\nZmień tytuł na Test issue.',
+    )
+  })
 })

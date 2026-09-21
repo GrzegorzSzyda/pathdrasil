@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { createApp, isApprovalAndPublicationMessage } from './app.js'
+import { createApp } from './app.js'
 import type { CommandRunner } from './infrastructure/command-runner.js'
 import { createLogger } from './infrastructure/logger.js'
 import { createIntegrationRegistry } from './integrations/registry.js'
+import type { TaskDraftService } from './task-drafts/task-draft-service.js'
 
 const missingCliRunner: CommandRunner = {
   async run() {
@@ -70,17 +71,27 @@ describe('HTTP app', () => {
       error: { code: 'REMOTE_ORIGIN_FORBIDDEN' },
     })
   })
-})
 
-describe('isApprovalAndPublicationMessage', () => {
-  it('recognizes natural Polish approval and publication instructions', () => {
-    expect(isApprovalAndPublicationMessage('Akceptuję.')).toBe(true)
-    expect(isApprovalAndPublicationMessage('Akceptujemy ten plan.')).toBe(true)
-    expect(isApprovalAndPublicationMessage('Zapisz to.')).toBe(true)
-    expect(isApprovalAndPublicationMessage('Publikuj.')).toBe(true)
-    expect(isApprovalAndPublicationMessage('OK')).toBe(true)
-    expect(
-      isApprovalAndPublicationMessage('Potrzebuję więcej informacji.'),
-    ).toBe(false)
+  it('starts draft generation and publication only through its dedicated endpoint', async () => {
+    const draft = { id: 'draft-id' }
+    const calls: Array<{ projectId: string; taskId: string }> = []
+    const generateAndPublish = async (projectId: string, taskId: string) => {
+      calls.push({ projectId, taskId })
+      return draft
+    }
+    const publishingApp = createApp({
+      integrations: createIntegrationRegistry(missingCliRunner),
+      logger: createLogger('silent'),
+      taskDrafts: { generateAndPublish } as unknown as TaskDraftService,
+    })
+
+    const response = await publishingApp.request(
+      '/api/projects/project-1/tasks/task-1/draft/generate-and-publish',
+      { method: 'POST' },
+    )
+
+    expect(response.status).toBe(202)
+    await expect(response.json()).resolves.toEqual({ draft })
+    expect(calls).toEqual([{ projectId: 'project-1', taskId: 'task-1' }])
   })
 })

@@ -14,6 +14,11 @@ export const taskDraftGenerationStatusSchema = z.enum([
 ])
 
 export const taskDraftContentSchema = z.object({
+  operation: z.enum(['update', 'create']).optional(),
+  deleteTaskTitles: z
+    .array(z.string().trim().min(1).max(240))
+    .max(30)
+    .optional(),
   title: z.string().trim().min(1).max(240),
   description: z.string().max(20_000),
   acceptanceCriteria: z.array(z.string().trim().min(1).max(1_000)).max(30),
